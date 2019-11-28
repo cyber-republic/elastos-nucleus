@@ -224,7 +224,7 @@ def sign_in(request):
     return render(request, 'login/sign_in.html')
 
 
-@login_required
+#@login_required
 def home(request):
     return render(request, 'login/home.html')
 
