@@ -20,6 +20,7 @@ def generate_key(request):
     else:
         return render(request, "service/generateKey.html")
 
+
 def upload_and_sign(request):
     return render(request, "service/uploadAndSign.html")
 
