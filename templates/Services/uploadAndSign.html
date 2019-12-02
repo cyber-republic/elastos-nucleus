@@ -48,7 +48,24 @@
 {% endblock servicetitle %} 
 
 {% block service %}
-<p>The Upload and Sign service goes here.</p>
+    {% if output %}
+        <h5 class="card-title">Response:</h5>
+        <p class="card-text">Message Hash :  {{ msg }}</p>
+        <p class="card-text">Public Key : {{ pub }}</p>
+        <p class="card-text">Signature : {{ sig }}</p>
+        <p class="card-text">Hive Hash : {{ Hash }}</p>
+        <a href="{% url "service:uploadAndSign" %}" methods="GET">
+        <button class="btn-default">
+            Upload Again
+        </button>
+        </a>
+    {% else %}
+       <form  class="form-group" method="post" enctype="multipart/form-data">
+       {% csrf_token %}
+       {{ form.as_p }}
+       <button type="submit">Upload</button>
+       </form>
+    {% endif %}
 {% endblock service %} 
 
 {% block description %}

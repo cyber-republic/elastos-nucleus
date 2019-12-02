@@ -48,7 +48,19 @@
 {% endblock servicetitle %} 
 
 {% block service %}
-<p>The Verify and Show service goes here.</p>
+    {% if output %}
+        <h5 class="card-title">Content:</h5>
+        <p class="card-text">{{ content }}</p>
+          <a href="{% url 'service:verifyAndShow' %}" methods="GET">
+            <button type="submit" class="btn-default">Show Again</button>
+        </a>
+    {% else %}
+         <form class="form-group" method="post">
+             {% csrf_token %}G
+             {{ form.as_p }}
+            <button type="submit" >Sumbit</button>
+         </form>
+    {% endif %}
 {% endblock service %} 
 
 {% block description %}
