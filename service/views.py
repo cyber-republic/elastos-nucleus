@@ -296,6 +296,11 @@ def view_wallet(request):
 
 
 @login_required
+def create_wallet(request):
+    return render(request, "service/create_wallet.html")
+
+
+@login_required
 def request_ela(request):
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
