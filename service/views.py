@@ -7,8 +7,8 @@ from console_main.views import login_required
 from django.contrib import messages
 from django.urls import reverse
 
-from adenine.common import Common
-from adenine.console import Console
+from elastos_adenine.common import Common
+from elastos_adenine.console import Console
 
 from .forms import UploadFileForm, VerifyAndShowForm
 from .models import UploadFile
