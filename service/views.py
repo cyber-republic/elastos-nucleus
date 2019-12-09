@@ -97,13 +97,18 @@ def verify_and_show(request):
 
 
 @login_required
+def create_wallet(request):
+    return render(request, "service/create_wallet.html")
+
+
+@login_required
 def request_ela(request):
     return render(request, "service/request_ela.html")
 
 
 @login_required
-def vote_supernodes(request):
-    return render(request, "service/vote_supernodes.html")
+def deploy_eth_contract(request):
+    return render(request, "service/deploy_eth_contract.html")
 
 
 @login_required
@@ -112,10 +117,6 @@ def run_eth_contract(request):
 
 
 @login_required
-def save_did_data(request):
-    return render(request, "service/save_did_data.html")
+def deploy_elastos_dapp(request):
+    return render(request, "service/deploy_elastos_dapp.html")
 
-
-@login_required
-def retrieve_did_data(request):
-    return render(request, "service/retrieve_did_data.html")
