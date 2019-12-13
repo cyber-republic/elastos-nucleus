@@ -148,3 +148,7 @@ def run_eth_contract(request):
 def deploy_elastos_dapp(request):
     return render(request, "service/deploy_elastos_dapp.html")
 
+@login_required
+def suggest_service(request):
+    return render(request, "service/suggest_service.html")
+

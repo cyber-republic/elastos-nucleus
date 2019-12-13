@@ -14,5 +14,5 @@ urlpatterns = [
     url(r'deploy_eth_contract', views.deploy_eth_contract, name="deploy_eth_contract"),
     url(r'run_eth_contract', views.run_eth_contract, name="run_eth_contract"),
     url(r'deploy_elastos_dapp', views.deploy_elastos_dapp, name="deploy_elastos_dapp"),
-
+    url(r'suggest_service', views.suggest_service, name="suggest_service"),
 ]
