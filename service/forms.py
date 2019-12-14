@@ -27,6 +27,11 @@ class VerifyAndShowForm(forms.Form):
     api_key = forms.CharField(max_length=300, help_text="Enter your API Key")
 
 
+class CreateWalletForm(forms.Form):
+    eth_password = forms.CharField(max_length=400)
+    api_key = forms.CharField(max_length=300)
+
+
 class DeployETHContractForm(forms.ModelForm):
     eth_account_address = forms.CharField(max_length=400)
     eth_account_password = forms.CharField(max_length=400)

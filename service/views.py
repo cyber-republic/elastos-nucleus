@@ -10,8 +10,9 @@ from django.urls import reverse
 from elastos_adenine.common import Common
 from elastos_adenine.hive import Hive
 from elastos_adenine.sidechain_eth import SidechainEth
+from elastos_adenine.wallet import Wallet
 
-from .forms import UploadAndSignForm, VerifyAndShowForm, DeployETHContractForm
+from .forms import UploadAndSignForm, VerifyAndShowForm, CreateWalletForm, DeployETHContractForm
 from .models import UploadFile
 
 
@@ -99,7 +100,37 @@ def verify_and_show(request):
 
 @login_required
 def create_wallet(request):
-    return render(request, "service/create_wallet.html")
+    did = request.session['did']
+    if request.method == "POST":
+        try:
+            wallet = Wallet()
+            api_key = request.POST['api_key']
+            eth_password = request.POST['eth_password']
+            response = wallet.create_wallet(api_key, eth_password)
+            if response.status:
+                content = json.loads(response.output)['result']
+                wallet_mainchain = content['mainchain']
+                wallet_did = content['sidechain']['did']
+                wallet_token = content['sidechain']['token']
+                wallet_eth = content['sidechain']['eth']
+                return render(request, "service/create_wallet.html", { 'output': True, 'wallet_mainchain': wallet_mainchain,
+                    'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth })
+            else:
+                messages.success(request, "Could not create wallet at this time. Please try again")
+                return redirect(reverse('service:create_wallet'))
+        except Exception as e:
+            messages.success(request, "Could not create wallet at this time. Please try again")
+            return redirect(reverse('service:create_wallet'))
+        finally:
+            wallet.close()
+    else:
+        form = CreateWalletForm()
+        return render(request, 'service/create_wallet.html', {'output': False, 'form': form})
+
+
+@login_required
+def view_wallet(request):
+    return render(request, "service/view_wallet.html")
 
 
 @login_required
@@ -140,11 +171,11 @@ def deploy_eth_contract(request):
 
 
 @login_required
-def run_eth_contract(request):
-    return render(request, "service/run_eth_contract.html")
+def watch_eth_contract(request):
+    return render(request, "service/watch_eth_contract.html")
 
 
 @login_required
-def deploy_elastos_dapp(request):
-    return render(request, "service/deploy_elastos_dapp.html")
+def run_eth_contract(request):
+    return render(request, "service/run_eth_contract.html")
 
