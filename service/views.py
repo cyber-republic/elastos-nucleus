@@ -422,7 +422,37 @@ def view_wallet(request):
 
 @login_required
 def create_wallet(request):
-    return render(request, "service/create_wallet.html")
+    did = request.session['did']
+    if request.method == "POST":
+        try:
+            wallet = Wallet()
+            api_key = request.POST['api_key']
+            eth_password = request.POST['eth_password']
+            response = wallet.create_wallet(api_key, eth_password)
+            if response.status:
+                content = json.loads(response.output)['result']
+                wallet_mainchain = content['mainchain']
+                wallet_did = content['sidechain']['did']
+                wallet_token = content['sidechain']['token']
+                wallet_eth = content['sidechain']['eth']
+                return render(request, "service/create_wallet.html", { 'output': True, 'wallet_mainchain': wallet_mainchain,
+                    'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth })
+            else:
+                messages.success(request, "Could not create wallet at this time. Please try again")
+                return redirect(reverse('service:create_wallet'))
+        except Exception as e:
+            messages.success(request, "Could not create wallet at this time. Please try again")
+            return redirect(reverse('service:create_wallet'))
+        finally:
+            wallet.close()
+    else:
+        form = CreateWalletForm()
+        return render(request, 'service/create_wallet.html', {'output': False, 'form': form})
+
+
+@login_required
+def view_wallet(request):
+    return render(request, "service/view_wallet.html")
 
 
 @login_required
