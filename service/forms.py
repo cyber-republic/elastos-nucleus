@@ -42,6 +42,18 @@ class ViewWalletForm(forms.Form):
         self.fields['chain'].required = False
         self.fields['chain'].widget = HiddenInput()
 
+
+class RequestELAForm(forms.Form):
+    chain = forms.CharField(max_length=300)
+    address = forms.CharField(max_length=300)
+    api_key = forms.CharField(max_length=64)
+
+    def __init__(self, *args, **kwargs):
+        super(RequestELAForm, self).__init__(*args, **kwargs)
+        self.fields['chain'].required = False
+        self.fields['chain'].widget = HiddenInput()
+
+
 class DeployETHContractForm(forms.ModelForm):
     eth_account_address = forms.CharField(max_length=300)
     eth_account_password = forms.CharField(max_length=300)

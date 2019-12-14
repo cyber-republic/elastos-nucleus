@@ -13,7 +13,7 @@ from elastos_adenine.sidechain_eth import SidechainEth
 from elastos_adenine.wallet import Wallet
 
 from .forms import UploadAndSignForm, VerifyAndShowForm
-from .forms import CreateWalletForm, ViewWalletForm
+from .forms import CreateWalletForm, ViewWalletForm, RequestELAForm
 from .forms import DeployETHContractForm
 from .models import UploadFile
 
@@ -196,7 +196,67 @@ def view_wallet(request):
 
 @login_required
 def request_ela(request):
-    return render(request, "service/request_ela.html")
+    form_to_display = {
+        'mainchain': RequestELAForm(initial={'chain': 'mainchain'}),
+        'did': RequestELAForm(initial={'chain': 'did'}),
+        'token': RequestELAForm(initial={'chain': 'token'}),
+        'eth': RequestELAForm(initial={'chain': 'eth'})
+    }
+    output = {
+        'mainchain': False,
+        'did': False,
+        'token': False,
+        'eth': False
+    }
+    if request.method == "POST":
+        address = {
+            'mainchain': '',
+            'did': '',
+            'token': '',
+            'eth': ''
+        }
+        deposit_amount = {
+            'mainchain': 0,
+            'did': 0,
+            'token': 0,
+            'eth': 0
+        }
+        if 'submit_mainchain' in request.POST:
+            chain = 'mainchain'
+            form = RequestELAForm(request.POST, initial={'chain': chain})
+        elif 'submit_did' in request.POST:
+            chain = 'did'
+            form = RequestELAForm(request.POST, initial={'chain': chain})
+        elif 'submit_token' in request.POST:
+            chain = 'token'
+            form = RequestELAForm(request.POST, initial={'chain': chain})
+        elif 'submit_eth' in request.POST:
+            chain = 'eth'
+            form = RequestELAForm(request.POST, initial={'chain': chain})
+
+        if form.is_valid():
+            api_key = form.cleaned_data.get('api_key')
+            addr = form.cleaned_data.get('address')   
+            try:
+                wallet = Wallet()
+                response = wallet.request_ela(api_key, chain, addr)
+                if response.status:
+                    output[chain] = True
+                    content = json.loads(response.output)['result']
+                    address[chain] = content['address']
+                    deposit_amount[chain] = content['deposit_amount']
+                    return render(request, "service/request_ela.html", { 'output': output, 'form': form_to_display,
+                        'address': address, 'deposit_amount': deposit_amount })
+                else:
+                    messages.success(request, "Could not view wallet at this time. Please try again")
+                    return redirect(reverse('service:request_ela'))
+            except Exception as e:
+                messages.success(request, "Could not view wallet at this time. Please try again")
+                return redirect(reverse('service:request_ela'))
+            finally:
+                wallet.close()
+    else:
+        return render(request, 'service/request_ela.html', {'output': output, 'form': form_to_display})
 
 
 @login_required
