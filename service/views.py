@@ -3,8 +3,6 @@ import json
 from decouple import config
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.template.defaultfilters import linebreaksbr
-from django.utils.html import linebreaks
 
 from console_main.views import login_required
 from django.contrib import messages
@@ -44,29 +42,34 @@ def upload_and_sign(request):
         # Purge old requests for housekeeping.
         UploadFile.objects.filter(did=did).delete()
 
-        private_key = request.POST['private_key']
-        api_key = request.POST['api_key']
         form = UploadAndSignForm(request.POST, request.FILES, initial={'did': did})
         if form.is_valid():
+            api_key = form.cleaned_data.get('api_key')
+            private_key = form.cleaned_data.get('private_key')
             form.save()
             temp_file = UploadFile.objects.get(did=did)
             file_path = temp_file.uploaded_file.path
-            console = Hive()
-            response = console.upload_and_sign(api_key, private_key, file_path)
-            data = json.loads(response.output)
-            if response.status:
-                temp_file.delete()
-                message_hash = data['result']['msg']
-                public_key = data['result']['pub']
-                signature = data['result']['sig']
-                file_hash = data['result']['hash']
-                return render(request, "service/upload_and_sign.html",
-                              {"message_hash": message_hash, "public_key": public_key, "signature": signature,
-                               "file_hash": file_hash, 'output': True})
-            else:
+            try:
+                hive = Hive()
+                response = hive.upload_and_sign(api_key, private_key, file_path)
+                data = json.loads(response.output)
+                if response.status:
+                    temp_file.delete()
+                    message_hash = data['result']['msg']
+                    public_key = data['result']['pub']
+                    signature = data['result']['sig']
+                    file_hash = data['result']['hash']
+                    return render(request, "service/upload_and_sign.html",
+                                  {"message_hash": message_hash, "public_key": public_key, "signature": signature,
+                                   "file_hash": file_hash, 'output': True})
+                else:
+                    messages.success(request, "File could not be uploaded. Please try again")
+                    return redirect(reverse('service:upload_and_sign'))
+            except Exception as e:
                 messages.success(request, "File could not be uploaded. Please try again")
                 return redirect(reverse('service:upload_and_sign'))
-
+            finally:
+                hive.close()
     else:
         form = UploadAndSignForm(initial={'did': did})
         return render(request, "service/upload_and_sign.html", {'form': form, 'output': False})
@@ -75,32 +78,33 @@ def upload_and_sign(request):
 @login_required
 def verify_and_show(request):
     if request.method == 'POST':
-        output = True
-        msg = request.POST['message_hash']
-        private_key = request.POST['private_key']
-        public_key = request.POST['public_key']
-        file_hash = request.POST['file_hash']
-        signature = request.POST['signature']
-        api_key = request.POST['api_key']
-        request_input = {
-            "msg": msg,
-            "pub": public_key,
-            "sig": signature,
-            "hash": file_hash,
-            "private_key": private_key
-        }
-        console = Hive()
-        response = console.verify_and_show(api_key, request_input)
-        if response.status:
-            content = response.output
-            return render(request, 'service/verify_and_show.html', {'output': output, 'content': content})
-        else:
-            messages.success(request, "File could not be verified nor shown. Please try again")
-            return redirect(reverse('service:verify_and_show'))
+        form = VerifyAndShowForm(request.POST)
+        if form.is_valid():
+            api_key = form.cleaned_data.get('api_key')
+            request_input = {
+                "msg": form.cleaned_data.get('message_hash'),
+                "pub": form.cleaned_data.get('public_key'),
+                "sig": form.cleaned_data.get('signature'),
+                "hash": form.cleaned_data.get('file_hash'),
+                "private_key": form.cleaned_data.get('private_key')
+            }
+            try:
+                hive = Hive()
+                response = hive.verify_and_show(api_key, request_input)
+                if response.status:
+                    content = response.output
+                    return render(request, 'service/verify_and_show.html', {'output': True, 'content': content})
+                else:
+                    messages.success(request, "File could not be verified nor shown. Please try again")
+                    return redirect(reverse('service:verify_and_show'))
+            except Exception as e:
+                messages.success(request, "File could not be verified nor shown. Please try again")
+                return redirect(reverse('service:verify_and_show'))
+            finally:
+                hive.close()
     else:
-        output = False
         form = VerifyAndShowForm()
-        return render(request, 'service/verify_and_show.html', {'output': output, 'form': form})
+        return render(request, 'service/verify_and_show.html', {'output': False, 'form': form})
 
 
 @login_required
