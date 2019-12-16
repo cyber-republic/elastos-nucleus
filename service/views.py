@@ -301,10 +301,9 @@ def create_wallet(request):
         form = CreateWalletForm(request.POST)
         if form.is_valid():
             api_key = form.cleaned_data.get('api_key')
-            eth_password = form.cleaned_data.get('eth_password')
             try:
                 wallet = Wallet()
-                response = wallet.create_wallet(api_key, eth_password)
+                response = wallet.create_wallet(api_key)
                 if response.status:
                     content = json.loads(response.output)['result']
                     wallet_mainchain = content['mainchain']
