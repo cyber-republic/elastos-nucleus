@@ -1,4 +1,5 @@
 import json
+import os
 
 from decouple import config
 from django.http import JsonResponse
@@ -21,6 +22,12 @@ from .models import UploadFile
 
 @login_required
 def generate_key(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/generate_key.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/generate_key.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     if request.method == 'POST':
         common = Common()
         did = request.session['did']
@@ -32,11 +39,17 @@ def generate_key(request):
             messages.success(request, "Could not generate an API key. Please try again")
             return redirect(reverse('service:generate_key'))
     else:
-        return render(request, "service/generate_key.html")
+        return render(request, "service/generate_key.html", {'sample_code': sample_code})
 
 
 @login_required
 def upload_and_sign(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/upload_and_sign.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/upload_and_sign.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     did = request.session['did']
     if request.method == 'POST':
         # Purge old requests for housekeeping.
@@ -61,7 +74,7 @@ def upload_and_sign(request):
                     file_hash = data['result']['hash']
                     return render(request, "service/upload_and_sign.html",
                                   {"message_hash": message_hash, "public_key": public_key, "signature": signature,
-                                   "file_hash": file_hash, 'output': True})
+                                   "file_hash": file_hash, 'output': True, 'sample_code': sample_code})
                 else:
                     messages.success(request, "File could not be uploaded. Please try again")
                     return redirect(reverse('service:upload_and_sign'))
@@ -72,11 +85,17 @@ def upload_and_sign(request):
                 hive.close()
     else:
         form = UploadAndSignForm(initial={'did': did})
-        return render(request, "service/upload_and_sign.html", {'form': form, 'output': False})
+        return render(request, "service/upload_and_sign.html", {'form': form, 'output': False, 'sample_code': sample_code})
 
 
 @login_required
 def verify_and_show(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/verify_and_show.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/verify_and_show.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     if request.method == 'POST':
         form = VerifyAndShowForm(request.POST)
         if form.is_valid():
@@ -93,7 +112,7 @@ def verify_and_show(request):
                 response = hive.verify_and_show(api_key, request_input)
                 if response.status:
                     content = response.output
-                    return render(request, 'service/verify_and_show.html', {'output': True, 'content': content})
+                    return render(request, 'service/verify_and_show.html', {'output': True, 'content': content, 'sample_code': sample_code})
                 else:
                     messages.success(request, "File could not be verified nor shown. Please try again")
                     return redirect(reverse('service:verify_and_show'))
@@ -104,11 +123,17 @@ def verify_and_show(request):
                 hive.close()
     else:
         form = VerifyAndShowForm()
-        return render(request, 'service/verify_and_show.html', {'output': False, 'form': form})
+        return render(request, 'service/verify_and_show.html', {'output': False, 'form': form, 'sample_code': sample_code})
 
 
 @login_required
 def create_wallet(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/create_wallet.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/create_wallet.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     if request.method == "POST":
         form = CreateWalletForm(request.POST)
         if form.is_valid():
@@ -124,7 +149,7 @@ def create_wallet(request):
                     wallet_token = content['sidechain']['token']
                     wallet_eth = content['sidechain']['eth']
                     return render(request, "service/create_wallet.html", { 'output': True, 'wallet_mainchain': wallet_mainchain,
-                        'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth })
+                        'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth, 'sample_code': sample_code })
                 else:
                     messages.success(request, "Could not create wallet at this time. Please try again")
                     return redirect(reverse('service:create_wallet'))
@@ -135,11 +160,17 @@ def create_wallet(request):
                 wallet.close()
     else:
         form = CreateWalletForm()
-        return render(request, 'service/create_wallet.html', {'output': False, 'form': form})
+        return render(request, 'service/create_wallet.html', {'output': False, 'form': form, 'sample_code': sample_code})
 
 
 @login_required
 def view_wallet(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/view_wallet.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/view_wallet.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     form_to_display = {
         'mainchain': ViewWalletForm(initial={'chain': 'mainchain'}),
         'did': ViewWalletForm(initial={'chain': 'did'}),
@@ -191,7 +222,7 @@ def view_wallet(request):
                     address[chain] = content['address']
                     balance[chain] = content['balance']
                     return render(request, "service/view_wallet.html", { 'output': output, 'form': form_to_display,
-                        'address': address, 'balance': balance })
+                        'address': address, 'balance': balance, 'sample_code': sample_code })
                 else:
                     messages.success(request, "Could not view wallet at this time. Please try again")
                     return redirect(reverse('service:view_wallet'))
@@ -201,11 +232,17 @@ def view_wallet(request):
             finally:
                 wallet.close()
     else:
-        return render(request, 'service/view_wallet.html', {'output': output, 'form': form_to_display})
+        return render(request, 'service/view_wallet.html', {'output': output, 'form': form_to_display, 'sample_code': sample_code})
 
 
 @login_required
 def request_ela(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/request_ela.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/request_ela.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     form_to_display = {
         'mainchain': RequestELAForm(initial={'chain': 'mainchain'}),
         'did': RequestELAForm(initial={'chain': 'did'}),
@@ -256,7 +293,7 @@ def request_ela(request):
                     address[chain] = content['address']
                     deposit_amount[chain] = content['deposit_amount']
                     return render(request, "service/request_ela.html", { 'output': output, 'form': form_to_display,
-                        'address': address, 'deposit_amount': deposit_amount })
+                        'address': address, 'deposit_amount': deposit_amount, 'sample_code': sample_code })
                 else:
                     messages.success(request, "Could not view wallet at this time. Please try again")
                     return redirect(reverse('service:request_ela'))
@@ -266,11 +303,17 @@ def request_ela(request):
             finally:
                 wallet.close()
     else:
-        return render(request, 'service/request_ela.html', {'output': output, 'form': form_to_display})
+        return render(request, 'service/request_ela.html', {'output': output, 'form': form_to_display, 'sample_code': sample_code})
 
 
 @login_required
 def deploy_eth_contract(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/deploy_eth_contract.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/deploy_eth_contract.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     did = request.session['did']
     if request.method == 'POST':
         # Purge old requests for housekeeping.
@@ -297,7 +340,7 @@ def deploy_eth_contract(request):
                     contract_code_hash = data['result']['contract_code_hash']
                     return render(request, "service/deploy_eth_contract.html",
                                   {"contract_address": contract_address, "contract_name": contract_name,
-                                   "contract_code_hash": contract_code_hash, 'output': True})
+                                   "contract_code_hash": contract_code_hash, 'output': True, 'sample_code': sample_code})
                 else:
                     messages.success(request, "Could not deploy smart contract to Eth sidechain. Please try again")
                     return redirect(reverse('service:deploy_eth_contract'))
@@ -308,11 +351,17 @@ def deploy_eth_contract(request):
                 sidechain_eth.close()
     else:
         form = DeployETHContractForm(initial={'did': did})
-        return render(request, "service/deploy_eth_contract.html", {'form': form, 'output': False})
+        return render(request, "service/deploy_eth_contract.html", {'form': form, 'output': False, 'sample_code': sample_code})
 
 
 @login_required
 def watch_eth_contract(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/watch_eth_contract.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/watch_eth_contract.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     if request.method == 'POST':
         form = WatchETHContractForm(request.POST)
         if form.is_valid():
@@ -330,7 +379,7 @@ def watch_eth_contract(request):
                     contract_functions = data['result']['contract_functions']
                     contract_source = data['result']['contract_source']
                     return render(request, "service/watch_eth_contract.html", {'output': True, 'contract_address': contract_address, 'contract_name': contract_name,
-                                                                               'contract_functions': contract_functions, 'contract_source': contract_source})
+                                                                               'contract_functions': contract_functions, 'contract_source': contract_source, 'sample_code': sample_code})
                 else:
                     messages.success(request, "Could not view smart contract code at this time. Please try again")
                     return redirect(reverse('service:watch_eth_contract'))
@@ -341,10 +390,16 @@ def watch_eth_contract(request):
                 sidechain_eth.close()
     else:
         form = WatchETHContractForm()
-        return render(request, 'service/watch_eth_contract.html', {'output': False, 'form': form})
+        return render(request, 'service/watch_eth_contract.html', {'output': False, 'form': form, 'sample_code': sample_code})
 
 
 @login_required
 def run_eth_contract(request):
-    return render(request, "service/run_eth_contract.html")
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/run_eth_contract.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/run_eth_contract.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
+    return render(request, "service/run_eth_contract.html", {'sample_code': sample_code})
 
