@@ -112,6 +112,7 @@ def create_wallet(request):
     if request.method == "POST":
         form = CreateWalletForm(request.POST)
         if form.is_valid():
+            network = form.cleaned_data.get('network')
             api_key = form.cleaned_data.get('api_key')
             try:
                 wallet = Wallet()
@@ -178,6 +179,7 @@ def view_wallet(request):
             form = ViewWalletForm(request.POST, initial={'chain': chain})
 
         if form.is_valid():
+            network = form.cleaned_data.get('network')
             api_key = form.cleaned_data.get('api_key')
             addr = form.cleaned_data.get('address')   
             try:
@@ -276,6 +278,7 @@ def deploy_eth_contract(request):
 
         form = DeployETHContractForm(request.POST, request.FILES, initial={'did': did})
         if form.is_valid():
+            network = form.cleaned_data.get('network')
             api_key = form.cleaned_data.get('api_key')
             eth_account_address = form.cleaned_data.get('eth_account_address')
             eth_private_key = form.cleaned_data.get('eth_private_key')
@@ -313,6 +316,7 @@ def watch_eth_contract(request):
     if request.method == 'POST':
         form = WatchETHContractForm(request.POST)
         if form.is_valid():
+            network = form.cleaned_data.get('network')
             api_key = form.cleaned_data.get('api_key')
             contract_address = form.cleaned_data.get('contract_address')
             contract_name = form.cleaned_data.get('contract_name')

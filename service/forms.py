@@ -2,6 +2,7 @@ from django import forms
 from django.forms import HiddenInput
 
 from .models import UploadFile
+from .choices import * 
 
 
 class UploadAndSignForm(forms.ModelForm):
@@ -28,10 +29,12 @@ class VerifyAndShowForm(forms.Form):
 
 
 class CreateWalletForm(forms.Form):
+    network = forms.ChoiceField(choices = NETWORK, label="", initial='', widget=forms.Select(), required=True)
     api_key = forms.CharField(max_length=300)
 
 
 class ViewWalletForm(forms.Form):
+    network = forms.ChoiceField(choices = NETWORK, label="", initial='', widget=forms.Select(), required=True)
     chain = forms.CharField(max_length=300)
     address = forms.CharField(max_length=300)
     api_key = forms.CharField(max_length=64)
@@ -54,6 +57,7 @@ class RequestELAForm(forms.Form):
 
 
 class DeployETHContractForm(forms.ModelForm):
+    network = forms.ChoiceField(choices = NETWORK, label="", initial='', widget=forms.Select(), required=True)
     eth_account_address = forms.CharField(max_length=300)
     eth_private_key = forms.CharField(max_length=300)
     eth_gas = forms.IntegerField()
@@ -70,6 +74,7 @@ class DeployETHContractForm(forms.ModelForm):
 
 
 class WatchETHContractForm(forms.Form):
+    network = forms.ChoiceField(choices = NETWORK, label="", initial='', widget=forms.Select(), required=True)
     contract_address = forms.CharField(max_length=300)
     contract_name = forms.CharField(max_length=300)
     contract_code_hash = forms.CharField(max_length=300)
