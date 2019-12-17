@@ -300,6 +300,7 @@ def create_wallet(request):
     if request.method == "POST":
         form = CreateWalletForm(request.POST)
         if form.is_valid():
+            network = form.cleaned_data.get('network')
             api_key = form.cleaned_data.get('api_key')
             try:
                 wallet = Wallet()
@@ -366,6 +367,7 @@ def view_wallet(request):
             form = ViewWalletForm(request.POST, initial={'chain': chain})
 
         if form.is_valid():
+            network = form.cleaned_data.get('network')
             api_key = form.cleaned_data.get('api_key')
             addr = form.cleaned_data.get('address')   
             try:
