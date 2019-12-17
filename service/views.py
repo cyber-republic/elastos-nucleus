@@ -297,6 +297,12 @@ def view_wallet(request):
 
 @login_required
 def create_wallet(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/create_wallet.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/create_wallet.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     if request.method == "POST":
         form = CreateWalletForm(request.POST)
         if form.is_valid():
@@ -312,7 +318,7 @@ def create_wallet(request):
                     wallet_token = content['sidechain']['token']
                     wallet_eth = content['sidechain']['eth']
                     return render(request, "service/create_wallet.html", { 'output': True, 'wallet_mainchain': wallet_mainchain,
-                        'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth })
+                        'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth, 'sample_code': sample_code })
                 else:
                     messages.success(request, "Could not create wallet at this time. Please try again")
                     return redirect(reverse('service:create_wallet'))
@@ -323,11 +329,17 @@ def create_wallet(request):
                 wallet.close()
     else:
         form = CreateWalletForm()
-        return render(request, 'service/create_wallet.html', {'output': False, 'form': form})
+        return render(request, 'service/create_wallet.html', {'output': False, 'form': form, 'sample_code': sample_code})
 
 
 @login_required
 def view_wallet(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/view_wallet.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/view_wallet.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     form_to_display = {
         'mainchain': ViewWalletForm(initial={'chain': 'mainchain'}),
         'did': ViewWalletForm(initial={'chain': 'did'}),
@@ -379,7 +391,7 @@ def view_wallet(request):
                     address[chain] = content['address']
                     balance[chain] = content['balance']
                     return render(request, "service/view_wallet.html", { 'output': output, 'form': form_to_display,
-                        'address': address, 'balance': balance })
+                        'address': address, 'balance': balance, 'sample_code': sample_code })
                 else:
                     messages.success(request, "Could not view wallet at this time. Please try again")
                     return redirect(reverse('service:view_wallet'))
@@ -389,7 +401,7 @@ def view_wallet(request):
             finally:
                 wallet.close()
     else:
-        return render(request, 'service/view_wallet.html', {'output': output, 'form': form_to_display})
+        return render(request, 'service/view_wallet.html', {'output': output, 'form': form_to_display, 'sample_code': sample_code})
 
 
 @login_required
