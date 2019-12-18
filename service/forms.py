@@ -3,7 +3,7 @@ from django.forms import HiddenInput
 
 from .models import UploadFile
 from .choices import * 
-
+  
 
 class GenerateAPIKeyForm(forms.Form):
     did = forms.CharField(max_length=64)
