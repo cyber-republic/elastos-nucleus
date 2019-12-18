@@ -3,9 +3,10 @@ from django.forms import HiddenInput
 
 from .models import UploadFile
 from .choices import * 
-
+  
 
 class UploadAndSignForm(forms.ModelForm):
+    network = forms.ChoiceField(choices = NETWORK_GMU, label="", initial='', widget=forms.Select(), required=True)
     private_key = forms.CharField(max_length=300)
     api_key = forms.CharField(max_length=64)
 
@@ -20,6 +21,7 @@ class UploadAndSignForm(forms.ModelForm):
 
 
 class VerifyAndShowForm(forms.Form):
+    network = forms.ChoiceField(choices = NETWORK_GMU, label="", initial='', widget=forms.Select(), required=True)
     message_hash = forms.CharField(max_length=300, help_text="Enter the Message Hash from DID")
     public_key = forms.CharField(max_length=300, help_text="Enter the Public Key from DID")
     signature = forms.CharField(max_length=300, help_text="Enter the Signature from DID")
@@ -46,6 +48,7 @@ class ViewWalletForm(forms.Form):
 
 
 class RequestELAForm(forms.Form):
+    network = forms.ChoiceField(choices = NETWORK_GMU, label="", initial='', widget=forms.Select(), required=True)
     chain = forms.CharField(max_length=300)
     address = forms.CharField(max_length=300)
     api_key = forms.CharField(max_length=64)

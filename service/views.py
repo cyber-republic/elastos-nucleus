@@ -29,15 +29,21 @@ def generate_key(request):
     with open(os.path.join(module_dir, 'sample_code/go/generate_key.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     if request.method == 'POST':
-        common = Common()
-        did = request.session['did']
-        response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
-        if response.status:
-            api_key = response.api_key
-            return JsonResponse({'API_KEY': api_key}, status=200)
-        else:
+        try:
+            common = Common()
+            did = request.session['did']
+            response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
+            if response.status:
+                api_key = response.api_key
+                return JsonResponse({'API_KEY': api_key}, status=200)
+            else:
+                messages.success(request, "Could not generate an API key. Please try again")
+                return redirect(reverse('service:generate_key'))
+        except Exception as e:
             messages.success(request, "Could not generate an API key. Please try again")
             return redirect(reverse('service:generate_key'))
+        finally:
+            common.close()
     else:
         return render(request, "service/generate_key.html", {'sample_code': sample_code})
 
@@ -57,6 +63,7 @@ def upload_and_sign(request):
 
         form = UploadAndSignForm(request.POST, request.FILES, initial={'did': did})
         if form.is_valid():
+            network = form.cleaned_data.get('network')
             api_key = form.cleaned_data.get('api_key')
             private_key = form.cleaned_data.get('private_key')
             form.save()
@@ -99,6 +106,7 @@ def verify_and_show(request):
     if request.method == 'POST':
         form = VerifyAndShowForm(request.POST)
         if form.is_valid():
+            network = form.cleaned_data.get('network')
             api_key = form.cleaned_data.get('api_key')
             request_input = {
                 "msg": form.cleaned_data.get('message_hash'),
@@ -282,6 +290,7 @@ def request_ela(request):
             form = RequestELAForm(request.POST, initial={'chain': chain})
 
         if form.is_valid():
+            network = form.cleaned_data.get('network')
             api_key = form.cleaned_data.get('api_key')
             addr = form.cleaned_data.get('address')   
             try:
