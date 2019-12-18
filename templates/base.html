@@ -153,21 +153,41 @@
         <div class="pos-f-t">
           <div class="collapse mx-auto" id="menu_playground">
             <div class="bg-primary p-2 text-center">
-                <a class="dropdown-item" href="#">Golang</a>
-                <a class="dropdown-item" href="#">Python</a>
-                <a class="dropdown-item" href="#">elastOS</a>
+                <a class="dropdown-item" href="#">Golang[COMING SOON]</a>
+                <a class="dropdown-item" href="#">Python[COMING SOON]</a>
+                <a class="dropdown-item" href="#">elastOS[COMING SOON]</a>
             </div>
           </div>
         </div>
         <div class="pos-f-t">
           <div class="collapse mx-auto" id="menu_applications">
             <div class="bg-primary p-2 text-center">
-                <a class="dropdown-item" href="#">Mainchain Browser</a>
-                <a class="dropdown-item" href="#">DID Sidechain Browser</a>
-                <a class="dropdown-item" href="#">Token Sidechain Browser[COMING SOON]</a>
-                <a class="dropdown-item" href="#">Ethereum Sidechain Browser</a>
-                <a class="dropdown-item" href="#">NEO Sidechain Browser[COMING SOON]</a>
-                <a class="dropdown-item" href="#">elastOS DApp Store Dashboard[COMING SOON]</a>
+              <div class="row">
+                  <div class="col-sm-8">
+                      <div class="btn-group dropright">
+                          <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Browser
+                          </button>
+                          <div class="dropdown-menu">
+                              <a class="dropdown-item" href="{%  url 'browser:mainchain' %}">Mainchain Browser</a>
+                              <a class="dropdown-item" href="{%  url 'browser:sidechain_did' %}">DID Sidechain Browser</a>
+                              <a class="dropdown-item" href="{%  url 'browser:sidechain_token' %}">Token Sidechain Browser[COMING SOON]</a>
+                              <a class="dropdown-item" href="{%  url 'browser:sidechain_eth' %}">Ethereum Sidechain Browser</a>
+                              <a class="dropdown-item" href="{%  url 'browser:sidechain_neo' %}">NEO Sidechain Browser[COMING SOON]</a>
+                          </div>
+                      </div><br><br>
+                      <div class="btn-group dropright">
+                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            elastOS Tools
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">DApp Store Dashboard[COMING SOON]</a>
+                            <a class="dropdown-item" href="#">Deploy DApp[COMING SOON]</a>
+                            <a class="dropdown-item" href="#">Deploy Vault[COMING SOON]</a>
+                        </div>
+                    </div>
+                  </div>
+              </div>
             </div>
           </div>
         </div>
@@ -176,8 +196,6 @@
             <div class="bg-primary p-2 text-center">
                 <a class="dropdown-item" href="#">Deploy your private net[COMING SOON]</a>
                 <a class="dropdown-item" href="#">Deploy your testnet nodes[COMING SOON]</a>
-                <!-- <a class="dropdown-item" href="#">Deploy your elastOS vault</a>-->
-                <a class="dropdown-item" href="#">Deploy your DApp to elastOS[COMING SOON]</a>
             </div>
           </div>
         </div>
