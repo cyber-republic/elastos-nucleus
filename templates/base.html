@@ -187,49 +187,56 @@
                 </div>
             </div>
 
-            <div class="collapse mx-auto" id="menu_playground">
-                <div class="bg-primary p-2 text-center">
-                    <a class="dropdown-item" href="#">Golang[COMING SOON]</a>
-                    <a class="dropdown-item" href="#">Python[COMING SOON]</a>
-                    <a class="dropdown-item" href="#">elastOS[COMING SOON]</a>
-                </div>
+            <div class="pos-f-t">
+              <div class="collapse mx-auto" id="menu_playground">
+                  <div class="bg-primary p-2 text-center">
+                      <a class="dropdown-item" href="#">Golang[COMING SOON]</a>
+                      <a class="dropdown-item" href="#">Python[COMING SOON]</a>
+                      <a class="dropdown-item" href="#">elastOS[COMING SOON]</a>
+                  </div>
+              </div>
             </div>
 
             <div class="pos-f-t">
-                <div class="collapse mx-auto" id="menu_applications">
-                    <div class="bg-primary p-2 text-center">
+              <div class="collapse mx-auto" id="menu_applications">
+                  <div class="bg-primary p-2 text-center">
+                      <div class="row">
+                        <li class="col-md-3" style="list-style-type:none">
+                          <ul>
+                              <li class="dropdown-header"
+                                  style="list-style-type:none; color: black; font-size:18px; font-weight:bold">
+                                  
+                              </li>
+                          </ul>
+                        </li>
 
-                        <li class="col-sm" style="list-style-type:none">
-                                <ul>
-                                    <li class="dropdown-header"
-                                        style="list-style-type:none; color: black; font-size:18px; font-weight:bold">
-                                        Browser
-                                    </li>
-                                    <a class="dropdown-item" href="{% url 'browser:mainchain' %}">Mainchain
-                                            Browser</a>
-                                        <a class="dropdown-item" href="{% url 'browser:sidechain_did' %}">DID Sidechain
-                                            Browser</a>
-                                        <a class="dropdown-item" href="{% url 'browser:sidechain_token' %}">Token
-                                            Sidechain Browser[COMING SOON]</a>
-                                        <a class="dropdown-item" href="{% url 'browser:sidechain_eth' %}">Ethereum
-                                            Sidechain Browser</a>
-                                        <a class="dropdown-item" href="{% url 'browser:sidechain_neo' %}">NEO Sidechain
-                                            Browser[COMING SOON]</a>
-                                    <li style="list-style-type:none" class="divider"></li>
-                                </ul>
-                                <ul>
-                                        <li class="dropdown-header"
-                                        style="list-style-type:none; color: black; font-size:18px; font-weight:bold">
-                                        elastOS Tools
-                                    </li>
-                                    <a class="dropdown-item" href="#">DApp Store Dashboard[COMING SOON]</a>
-                                    <a class="dropdown-item" href="#">Deploy DApp[COMING SOON]</a>
-                                    <a class="dropdown-item" href="#">Deploy Vault[COMING SOON]</a>
-                                </ul>
-                            </li>
-                    </div>
-                </div>
-            </div>
+                          <li class="col-md-3" style="list-style-type:none">
+                              <ul>
+                                <li class="dropdown-header" style="list-style-type:none; color: black; font-size:18px; font-weight:bold">
+                                  Browser
+                                </li>
+                                <a href="{% url 'browser:mainchain' %}" style="color:black; text-decoration:none">Mainchain Browser</a><br>
+                                <a href="{% url 'browser:sidechain_did' %}" style="color:black; text-decoration:none">DID Sidechain Browser</a><br>
+                                <a href="{% url 'browser:sidechain_token' %}" style="color:black; text-decoration:none">Token Sidechain Browser</a><br>
+                                <a href="{% url 'browser:sidechain_neo' %}" style="color:black; text-decoration:none">NEO Sidechain Browser[COMING SOON]</a><br>
+                                <a href="{% url 'browser:sidechain_eth' %}" style="color:black; text-decoration:none">ETH Sidechain Browser</a><br>
+                              </ul>
+                          </li>
+                          <li class="col-md-3" style="list-style-type:none">
+                              <ul>
+                                  <li class="dropdown-header" style="list-style-type:none; color: black; font-size:18px; font-weight:bold">
+                                    elastOS Tools
+                                  </li>
+                                  <a href="{% url 'service:create_wallet' %}"
+                                     style="color:black; text-decoration:none">DApp Store Dashboard[COMING SOON]</a> <br>
+                                  <a href="{% url 'service:view_wallet' %}" style="color:black; text-decoration:none">Deploy DApp[COMING SOON]</a> <br>
+                                  <a href="{% url 'service:request_ela' %}" style="color:black; text-decoration:none">Deploy Vault[COMING SOON]</a>
+                              </ul>
+                          </li>
+                      </div>
+                  </div>
+              </div>
+          </div>
 
             <div class="pos-f-t">
                 <div class="collapse mx-auto" id="menu_workspaces">
