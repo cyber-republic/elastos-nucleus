@@ -17,7 +17,7 @@ from elastos_adenine.wallet import Wallet
 from .forms import UploadAndSignForm, VerifyAndShowForm
 from .forms import CreateWalletForm, ViewWalletForm, RequestELAForm
 from .forms import DeployETHContractForm, WatchETHContractForm
-from .models import UploadFile
+from .models import UploadFile , UserAPIKeys
 
 
 @login_required
@@ -32,13 +32,26 @@ def generate_key(request):
         try:
             common = Common()
             did = request.session['did']
-            response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
-            if response.status:
-                api_key = response.api_key
-                return JsonResponse({'API_KEY': api_key}, status=200)
+            if 'API_KEY' not in request.session:
+                if UserAPIKeys.objects.filter(did=request.session['did']):
+                    obj = UserAPIKeys.objects.get(did=request.session['did'])
+                    response = obj.apiKey
+                    request.session['API_KEY'] = response
+                    return JsonResponse({'API_KEY': response}, status=200)
+                else:
+                    response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
+                    if response.status:
+                        api_key = response.api_key
+                        obj = UserAPIKeys(did=did, apiKey=api_key)
+                        obj.save()
+                        request.session['API_KEY'] = api_key
+                        return JsonResponse({'API_KEY': api_key}, status=200)
+                    else:
+                        messages.success(request, "Could not generate an API key. Please try again")
+                        return redirect(reverse('service:generate_key'))
             else:
-                messages.success(request, "Could not generate an API key. Please try again")
-                return redirect(reverse('service:generate_key'))
+                response = request.session['API_KEY']
+                return JsonResponse({'API_KEY': response}, status=200)
         except Exception as e:
             messages.success(request, "Could not generate an API key. Please try again")
             return redirect(reverse('service:generate_key'))
