@@ -17,7 +17,7 @@ from elastos_adenine.wallet import Wallet
 from .forms import UploadAndSignForm, VerifyAndShowForm
 from .forms import CreateWalletForm, ViewWalletForm, RequestELAForm
 from .forms import DeployETHContractForm, WatchETHContractForm
-from .models import UploadFile , userAPIKeys
+from .models import UploadFile , UserAPIKeys
 
 
 @login_required
@@ -33,8 +33,8 @@ def generate_key(request):
             common = Common()
             did = request.session['did']
             if 'API_KEY' not in request.session:
-                if userAPIKeys.objects.filter(did=request.session['did']):
-                    obj = userAPIKeys.objects.get(did=request.session['did'])
+                if UserAPIKeys.objects.filter(did=request.session['did']):
+                    obj = UserAPIKeys.objects.get(did=request.session['did'])
                     response = obj.apiKey
                     request.session['API_KEY'] = response
                     return JsonResponse({'API_KEY': response}, status=200)
@@ -42,7 +42,7 @@ def generate_key(request):
                     response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
                     if response.status:
                         api_key = response.api_key
-                        obj = userAPIKeys(did=did, apiKey=api_key)
+                        obj = UserAPIKeys(did=did, apiKey=api_key)
                         obj.save()
                         request.session['API_KEY'] = api_key
                         return JsonResponse({'API_KEY': api_key}, status=200)

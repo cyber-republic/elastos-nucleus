@@ -17,8 +17,6 @@ class UploadFile(models.Model):
         super(UploadFile, self).delete(*args, **kwargs)
 
 
-class userAPIKeys(models.Model):
+class UserAPIKeys(models.Model):
     did = models.CharField(max_length=64)
-    apiKey = models.CharField(max_length= 120)
-
-
+    apiKey = models.CharField(max_length=120)
