@@ -19,4 +19,4 @@ class UploadFile(models.Model):
 
 class UserAPIKeys(models.Model):
     did = models.CharField(max_length=64)
-    apiKey = models.CharField(max_length=120)
+    api_key = models.CharField(max_length=64)

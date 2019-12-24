@@ -32,26 +32,23 @@ def generate_key(request):
         try:
             common = Common()
             did = request.session['did']
-            if 'API_KEY' not in request.session:
-                if UserAPIKeys.objects.filter(did=request.session['did']):
-                    obj = UserAPIKeys.objects.get(did=request.session['did'])
-                    response = obj.apiKey
-                    request.session['API_KEY'] = response
-                    return JsonResponse({'API_KEY': response}, status=200)
+            if 'api_key' not in request.session.keys():
+                if UserAPIKeys.objects.filter(did=did):
+                    obj = UserAPIKeys.objects.get(did=did)
+                    api_key = obj.api_key
                 else:
                     response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
                     if response.status:
                         api_key = response.api_key
-                        obj = UserAPIKeys(did=did, apiKey=api_key)
+                        obj = UserAPIKeys(did=did, api_key=api_key)
                         obj.save()
-                        request.session['API_KEY'] = api_key
-                        return JsonResponse({'API_KEY': api_key}, status=200)
                     else:
                         messages.success(request, "Could not generate an API key. Please try again")
                         return redirect(reverse('service:generate_key'))
+                request.session['api_key'] = api_key
             else:
-                response = request.session['API_KEY']
-                return JsonResponse({'API_KEY': response}, status=200)
+                api_key = request.session['api_key']
+            return JsonResponse({'api_key': api_key}, status=200)
         except Exception as e:
             messages.success(request, "Could not generate an API key. Please try again")
             return redirect(reverse('service:generate_key'))
