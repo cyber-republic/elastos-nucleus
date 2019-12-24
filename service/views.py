@@ -32,22 +32,19 @@ def generate_key(request):
         try:
             common = Common()
             did = request.session['did']
-            if 'api_key' not in request.session.keys():
-                if UserAPIKeys.objects.filter(did=did):
-                    obj = UserAPIKeys.objects.get(did=did)
-                    api_key = obj.api_key
-                else:
-                    response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
-                    if response.status:
-                        api_key = response.api_key
-                        obj = UserAPIKeys(did=did, api_key=api_key)
-                        obj.save()
-                    else:
-                        messages.success(request, "Could not generate an API key. Please try again")
-                        return redirect(reverse('service:generate_key'))
-                request.session['api_key'] = api_key
+            response = common.get_api_key_request(config('SHARED_SECRET_ADENINE'), did)
+            if response.status:
+                api_key = response.api_key
             else:
-                api_key = request.session['api_key']
+                response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
+                if response.status:
+                    api_key = response.api_key
+                    obj = UserAPIKeys(did=did, api_key=api_key)
+                    obj.save()
+                else:
+                    messages.success(request, "Could not generate an API key. Please try again")
+                    return redirect(reverse('service:generate_key'))
+            request.session['api_key'] = api_key
             return JsonResponse({'api_key': api_key}, status=200)
         except Exception as e:
             messages.success(request, "Could not generate an API key. Please try again")
@@ -101,7 +98,7 @@ def upload_and_sign(request):
             finally:
                 hive.close()
     else:
-        form = UploadAndSignForm(initial={'did': did})
+        form = UploadAndSignForm(initial={'did': did, 'api_key': request.session['api_key']})
         return render(request, "service/upload_and_sign.html", {'form': form, 'output': False, 'sample_code': sample_code})
 
 
@@ -140,7 +137,7 @@ def verify_and_show(request):
             finally:
                 hive.close()
     else:
-        form = VerifyAndShowForm()
+        form = VerifyAndShowForm(initial={'api_key': request.session['api_key']})
         return render(request, 'service/verify_and_show.html', {'output': False, 'form': form, 'sample_code': sample_code})
 
 
@@ -177,7 +174,7 @@ def create_wallet(request):
             finally:
                 wallet.close()
     else:
-        form = CreateWalletForm()
+        form = CreateWalletForm(initial={'api_key': request.session['api_key']})
         return render(request, 'service/create_wallet.html', {'output': False, 'form': form, 'sample_code': sample_code})
 
 
@@ -190,10 +187,10 @@ def view_wallet(request):
     with open(os.path.join(module_dir, 'sample_code/go/view_wallet.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     form_to_display = {
-        'mainchain': ViewWalletForm(initial={'chain': 'mainchain'}),
-        'did': ViewWalletForm(initial={'chain': 'did'}),
-        'token': ViewWalletForm(initial={'chain': 'token'}),
-        'eth': ViewWalletForm(initial={'chain': 'eth'})
+        'mainchain': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'mainchain'}),
+        'did': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'did'}),
+        'token': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'token'}),
+        'eth': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'eth'})
     }
     output = {
         'mainchain': False,
@@ -262,10 +259,10 @@ def request_ela(request):
     with open(os.path.join(module_dir, 'sample_code/go/request_ela.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     form_to_display = {
-        'mainchain': RequestELAForm(initial={'chain': 'mainchain'}),
-        'did': RequestELAForm(initial={'chain': 'did'}),
-        'token': RequestELAForm(initial={'chain': 'token'}),
-        'eth': RequestELAForm(initial={'chain': 'eth'})
+        'mainchain': RequestELAForm(initial={'api_key': request.session['api_key'], 'chain': 'mainchain'}),
+        'did': RequestELAForm(initial={'api_key': request.session['api_key'], 'chain': 'did'}),
+        'token': RequestELAForm(initial={'api_key': request.session['api_key'], 'chain': 'token'}),
+        'eth': RequestELAForm(initial={'api_key': request.session['api_key'], 'chain': 'eth'})
     }
     output = {
         'mainchain': False,
@@ -369,7 +366,7 @@ def deploy_eth_contract(request):
             finally:
                 sidechain_eth.close()
     else:
-        form = DeployETHContractForm(initial={'did': did})
+        form = DeployETHContractForm(initial={'did': did, 'api_key': request.session['api_key']})
         return render(request, "service/deploy_eth_contract.html", {'form': form, 'output': False, 'sample_code': sample_code})
 
 
@@ -408,7 +405,7 @@ def watch_eth_contract(request):
             finally:
                 sidechain_eth.close()
     else:
-        form = WatchETHContractForm()
+        form = WatchETHContractForm(initial={'api_key': request.session['api_key']})
         return render(request, 'service/watch_eth_contract.html', {'output': False, 'form': form, 'sample_code': sample_code})
 
 
@@ -421,6 +418,7 @@ def run_eth_contract(request):
     with open(os.path.join(module_dir, 'sample_code/go/run_eth_contract.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     return render(request, "service/run_eth_contract.html", {'sample_code': sample_code})
+
 
 @login_required
 def suggest_service(request):

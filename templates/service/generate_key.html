@@ -55,10 +55,10 @@
 <div class="input-group mb-3">
   <div class="input-group-prepend">
     <button class="btn btn-secondary" type="button" id="getKeyBtn" onclick="getAPIKey()">
-      Generate Key
+      Generate API Key
     </button>
   </div>
-  <input id="api_key" type="text" class="form-control" value="Key will appear here" aria-label="api_key" aria-describedby="getKeyBtn" readonly>
+  <input id="api_key" type="text" class="form-control" value="{{ request.session.api_key }}" aria-label="api_key" aria-describedby="getKeyBtn" readonly>
 </div>
 {% endblock service %} 
 
