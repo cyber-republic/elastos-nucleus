@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import UploadFile
+from .models import UploadFile , UserAPIKeys
 
 
 class UploadFileAdmin(admin.ModelAdmin):
@@ -9,3 +9,5 @@ class UploadFileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(UploadFile, UploadFileAdmin)
+
+admin.site.register(UserAPIKeys)
