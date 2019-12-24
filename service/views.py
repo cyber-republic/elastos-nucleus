@@ -453,7 +453,7 @@ def create_wallet(request):
             finally:
                 wallet.close()
     else:
-        form = CreateWalletForm()
+        form = CreateWalletForm(initial={'api_key': request.session['api_key']})
         return render(request, 'service/create_wallet.html', {'output': False, 'form': form, 'sample_code': sample_code})
 
 
@@ -466,10 +466,10 @@ def view_wallet(request):
     with open(os.path.join(module_dir, 'sample_code/go/view_wallet.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     form_to_display = {
-        'mainchain': ViewWalletForm(initial={'chain': 'mainchain'}),
-        'did': ViewWalletForm(initial={'chain': 'did'}),
-        'token': ViewWalletForm(initial={'chain': 'token'}),
-        'eth': ViewWalletForm(initial={'chain': 'eth'})
+        'mainchain': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'mainchain'}),
+        'did': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'did'}),
+        'token': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'token'}),
+        'eth': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'eth'})
     }
     output = {
         'mainchain': False,
@@ -697,6 +697,7 @@ def run_eth_contract(request):
     with open(os.path.join(module_dir, 'sample_code/go/run_eth_contract.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     return render(request, "service/run_eth_contract.html", {'sample_code': sample_code})
+
 
 @login_required
 def suggest_service(request):
