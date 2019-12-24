@@ -14,6 +14,7 @@ from elastos_adenine.hive import Hive
 from elastos_adenine.sidechain_eth import SidechainEth
 from elastos_adenine.wallet import Wallet
 
+from .forms import GenerateAPIKeyForm
 from .forms import UploadAndSignForm, VerifyAndShowForm
 from .forms import CreateWalletForm, ViewWalletForm, RequestELAForm
 from .forms import DeployETHContractForm, WatchETHContractForm
@@ -22,6 +23,7 @@ from .models import UploadFile , UserAPIKeys
 
 @login_required
 def generate_key(request):
+    did = request.session['did']
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/generate_key.py'), 'r') as myfile:
@@ -29,30 +31,48 @@ def generate_key(request):
     with open(os.path.join(module_dir, 'sample_code/go/generate_key.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     if request.method == 'POST':
-        try:
-            common = Common()
-            did = request.session['did']
-            response = common.get_api_key_request(config('SHARED_SECRET_ADENINE'), did)
-            if response.status:
-                api_key = response.api_key
-            else:
-                response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
-                if response.status:
-                    api_key = response.api_key
-                    obj = UserAPIKeys(did=did, api_key=api_key)
-                    obj.save()
+        form = GenerateAPIKeyForm(request.POST, initial={'did': did})
+        if form.is_valid():
+            try:
+                common = Common()
+                got_error = False
+                output = {}
+                if 'submit_get_api_key' in request.POST:
+                    response = common.get_api_key_request(config('SHARED_SECRET_ADENINE'), did)
+                    if response.status:
+                        api_key = response.api_key
+                        obj, created = UserAPIKeys.objects.update_or_create(did=did,
+                                                                            defaults={'did': did, 'api_key': api_key})
+                        obj.save()
+                        output['get_api_key'] = True
+                    else:
+                        got_error = True
+                elif 'submit_generate_api_key' in request.POST:
+                    response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
+                    if response.status:
+                        api_key = response.api_key
+                        obj, created = UserAPIKeys.objects.update_or_create(did=did,
+                                                                            defaults={'did': did, 'api_key': api_key})
+                        obj.save()
+                        output['generate_api_key'] = True
+                    else:
+                        got_error = True
                 else:
+                    got_error = True
+                if got_error:
                     messages.success(request, "Could not generate an API key. Please try again")
                     return redirect(reverse('service:generate_key'))
-            request.session['api_key'] = api_key
-            return JsonResponse({'api_key': api_key}, status=200)
-        except Exception as e:
-            messages.success(request, "Could not generate an API key. Please try again")
-            return redirect(reverse('service:generate_key'))
-        finally:
-            common.close()
+                else:
+                    request.session['api_key'] = api_key
+                    return render(request, "service/generate_key.html", {'output': output, 'api_key': api_key})
+            except Exception as e:
+                messages.success(request, "Could not generate an API key. Please try again")
+                return redirect(reverse('service:generate_key'))
+            finally:
+                common.close()
     else:
-        return render(request, "service/generate_key.html", {'sample_code': sample_code})
+        form = GenerateAPIKeyForm(initial={'did': did})
+        return render(request, "service/generate_key.html", {'form': form, 'sample_code': sample_code})
 
 
 @login_required
