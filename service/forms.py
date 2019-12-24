@@ -3,7 +3,16 @@ from django.forms import HiddenInput
 
 from .models import UploadFile
 from .choices import * 
-  
+
+
+class GenerateAPIKeyForm(forms.Form):
+    did = forms.CharField(max_length=64)
+
+    def __init__(self, *args, **kwargs):
+        super(GenerateAPIKeyForm, self).__init__(*args, **kwargs)
+        self.fields['did'].required = False
+        self.fields['did'].widget = HiddenInput()
+
 
 class GenerateAPIKeyForm(forms.Form):
     did = forms.CharField(max_length=64)
