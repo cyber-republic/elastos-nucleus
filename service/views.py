@@ -698,7 +698,6 @@ def run_eth_contract(request):
         sample_code['go'] = myfile.read()
     return render(request, "service/run_eth_contract.html", {'sample_code': sample_code})
 
-
 @login_required
 def suggest_service(request):
     return render(request, "service/suggest_service.html")
