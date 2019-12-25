@@ -79,6 +79,12 @@ def generate_key(request):
 
 @login_required
 def upload_and_sign(request):
+    sample_code = {}
+    module_dir = os.path.dirname(__file__)  
+    with open(os.path.join(module_dir, 'sample_code/python/upload_and_sign.py'), 'r') as myfile:
+        sample_code['python'] = myfile.read()
+    with open(os.path.join(module_dir, 'sample_code/go/upload_and_sign.go'), 'r') as myfile:
+        sample_code['go'] = myfile.read()
     did = request.session['did']
     sample_code = {}
     module_dir = os.path.dirname(__file__)  

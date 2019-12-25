@@ -8,7 +8,6 @@ from decouple import config
 from login.models import DIDUser
 from service.models import UserServiceSessionVars
 
-
 def login_required(function):
     def wrapper(request, *args, **kw):
         if not request.session.get('logged_in'):
