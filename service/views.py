@@ -79,6 +79,7 @@ def generate_key(request):
 
 @login_required
 def upload_and_sign(request):
+    did = request.session['did']
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/upload_and_sign.py'), 'r') as myfile:
@@ -317,6 +318,21 @@ def create_wallet(request):
                     wallet_did = content['sidechain']['did']
                     wallet_token = content['sidechain']['token']
                     wallet_eth = content['sidechain']['eth']
+                    obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
+                                                                                   defaults={'did': did,
+                                                                                             'api_key': api_key,
+                                                                                             'mnemonic_mainchain': wallet_mainchain['mnemonic'],
+                                                                                             'public_key_mainchain': wallet_mainchain['public_key'],
+                                                                                             'private_key_mainchain': wallet_mainchain['private_key'],
+                                                                                             'address_mainchain': wallet_mainchain['address'],
+                                                                                             'private_key_did': wallet_did['private_key'],
+                                                                                             'public_key_did': wallet_did['public_key'],
+                                                                                             'address_did': wallet_did['address'],
+                                                                                             'did_did': wallet_did['did'],
+                                                                                             'address_eth': wallet_eth['address'],
+                                                                                             'private_key_eth': wallet_eth['private_key']})
+                    obj.save()
+                    populate_session_vars_from_database(request, did)
                     return render(request, "service/create_wallet.html", { 'output': True, 'wallet_mainchain': wallet_mainchain,
                         'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth, 'sample_code': sample_code })
                 else:
@@ -341,10 +357,10 @@ def view_wallet(request):
     with open(os.path.join(module_dir, 'sample_code/go/view_wallet.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     form_to_display = {
-        'mainchain': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'mainchain'}),
-        'did': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'did'}),
-        'token': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'token'}),
-        'eth': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'eth'})
+        'mainchain': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'mainchain', 'address': request.session['address_mainchain']}),
+        'did': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'did', 'address': request.session['address_did']}),
+        'token': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'token', 'address': request.session['address_mainchain']}),
+        'eth': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'eth', 'address': request.session['address_eth']})
     }
     output = {
         'mainchain': False,
