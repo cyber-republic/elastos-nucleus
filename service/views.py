@@ -466,10 +466,10 @@ def view_wallet(request):
     with open(os.path.join(module_dir, 'sample_code/go/view_wallet.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     form_to_display = {
-        'mainchain': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'mainchain'}),
-        'did': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'did'}),
-        'token': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'token'}),
-        'eth': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'eth'})
+        'mainchain': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'mainchain', 'address': request.session['address_mainchain']}),
+        'did': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'did', 'address': request.session['address_did']}),
+        'token': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'token', 'address': request.session['address_mainchain']}),
+        'eth': ViewWalletForm(initial={'api_key': request.session['api_key'], 'chain': 'eth', 'address': request.session['address_eth']})
     }
     output = {
         'mainchain': False,
