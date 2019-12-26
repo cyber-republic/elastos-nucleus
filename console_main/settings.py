@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Include scss directory for Sass processor
 SASS_PROCESSOR_INCLUDE_DIRS = [
-    os.path.join(BASE_DIR, 'static/scss'),
+    os.path.join(BASE_DIR, 'www/static/scss'),
 ]
 
 # Quick-start development settings - unsuitable for production
