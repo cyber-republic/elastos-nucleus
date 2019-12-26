@@ -27,7 +27,7 @@ tools/server.*
 tools/.postgres-data
 
 # static files
-static/
+www/
 
 # uploaded files
 media/
