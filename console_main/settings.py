@@ -47,13 +47,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'service.apps.ServiceConfig',
-    'browser.apps.BrowserConfig',
-    'login.apps.LoginConfig',
     'qr_code',
     'django_extensions',
-    'django_simple_cookie_consent'
-
+    'django_simple_cookie_consent',
+    'console_main.apps.ConsoleMainConfig',
+    'login.apps.LoginConfig',
+    'service.apps.ServiceConfig',
+    'browser.apps.BrowserConfig'
 ]
 
 MIDDLEWARE = [
