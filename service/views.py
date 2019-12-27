@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from console_main.views import login_required, populate_session_vars_from_database
 from django.contrib import messages
 from django.urls import reverse
+from django.utils import timezone
 
 from elastos_adenine.common import Common
 from elastos_adenine.hive import Hive
@@ -18,12 +19,26 @@ from .forms import GenerateAPIKeyForm
 from .forms import UploadAndSignForm, VerifyAndShowForm
 from .forms import CreateWalletForm, ViewWalletForm, RequestELAForm
 from .forms import DeployETHContractForm, WatchETHContractForm
-from .models import UploadFile, UserServiceSessionVars
+
+from .models import UploadFile, UserServiceSessionVars , TrackUserService
+from django.db import models
+from django.db.models import F
 
 
 @login_required
 def generate_key(request):
     did = request.session['did']
+    try:
+        track_obj = TrackUserService.objects.get(did= did , service='generate_key')
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserService.objects.create(did=did, name = "Generate API Key", service='generate_key' , url="service:generate_key" , number_visits=1)
+        track_obj.save()
+    except:
+        print("error happened in the creation or update of object")
+    recent_services = TrackUserService.objects.filter(did= did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/generate_key.py'), 'r') as myfile:
@@ -66,7 +81,7 @@ def generate_key(request):
                     return redirect(reverse('service:generate_key'))
                 else:
                     request.session['api_key'] = api_key
-                    return render(request, "service/generate_key.html", {'output': output, 'api_key': api_key})
+                    return render(request, "service/generate_key.html", {'output': output, 'api_key': api_key , 'recent_services':recent_services})
             except Exception as e:
                 messages.success(request, "Could not generate an API key. Please try again")
                 return redirect(reverse('service:generate_key'))
@@ -74,12 +89,24 @@ def generate_key(request):
                 common.close()
     else:
         form = GenerateAPIKeyForm(initial={'did': did})
-        return render(request, "service/generate_key.html", {'form': form, 'sample_code': sample_code})
+        return render(request, "service/generate_key.html", {'form': form, 'sample_code': sample_code ,'recent_services':recent_services})
 
 
 @login_required
 def upload_and_sign(request):
     did = request.session['did']
+    try:
+        track_obj = TrackUserService.objects.get(did=did, service='upload_and_sign')
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserService.objects.create(did=did, name="Upload and Sign", service='upload_and_sign',
+                                                    url="service:upload_and_sign", number_visits=1)
+        track_obj.save()
+    except:
+        print("error happened in the creation or update of object")
+    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/upload_and_sign.py'), 'r') as myfile:
@@ -117,7 +144,7 @@ def upload_and_sign(request):
                     file_hash = data['result']['hash']
                     return render(request, "service/upload_and_sign.html",
                                   {"message_hash": message_hash, "public_key": public_key, "signature": signature,
-                                   "file_hash": file_hash, 'output': True, 'sample_code': sample_code})
+                                   "file_hash": file_hash, 'output': True, 'sample_code': sample_code , 'recent_services':recent_services})
                 else:
                     messages.success(request, "File could not be uploaded. Please try again")
                     return redirect(reverse('service:upload_and_sign'))
@@ -128,12 +155,24 @@ def upload_and_sign(request):
                 hive.close()
     else:
         form = UploadAndSignForm(initial={'did': did, 'api_key': request.session['api_key'], 'private_key': request.session['private_key_mainchain']})
-        return render(request, "service/upload_and_sign.html", {'form': form, 'output': False, 'sample_code': sample_code})
+        return render(request, "service/upload_and_sign.html", {'form': form, 'output': False, 'sample_code': sample_code , 'recent_services':recent_services})
 
 
 @login_required
 def verify_and_show(request):
     did = request.session['did']
+    try:
+        track_obj = TrackUserService.objects.get(did=did, service='verify_and_show')
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserService.objects.create(did=did, name="Verify and Show", service='verify_and_show',
+                                                    url="service:verify_and_show", number_visits=1)
+        track_obj.save()
+    except:
+        print("error happened in the creation or update of object")
+    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/verify_and_show.py'), 'r') as myfile:
@@ -157,7 +196,7 @@ def verify_and_show(request):
                 response = hive.verify_and_show(api_key, request_input)
                 if response.status:
                     content = response.output
-                    return render(request, 'service/verify_and_show.html', {'output': True, 'content': content, 'sample_code': sample_code})
+                    return render(request, 'service/verify_and_show.html', {'output': True, 'content': content, 'sample_code': sample_code , 'recent_services':recent_services})
                 else:
                     messages.success(request, "File could not be verified nor shown. Please try again")
                     return redirect(reverse('service:verify_and_show'))
@@ -168,12 +207,24 @@ def verify_and_show(request):
                 hive.close()
     else:
         form = VerifyAndShowForm(initial={'api_key': request.session['api_key'], 'private_key': request.session['private_key_mainchain'], 'public_key': request.session['public_key_mainchain']})
-        return render(request, 'service/verify_and_show.html', {'output': False, 'form': form, 'sample_code': sample_code})
+        return render(request, 'service/verify_and_show.html', {'output': False, 'form': form, 'sample_code': sample_code ,'recent_services': recent_services})
 
 
 @login_required
 def create_wallet(request):
     did = request.session['did']
+    try:
+        track_obj = TrackUserService.objects.get(did=did, service='create_wallet')
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserService.objects.create(did=did, name="Create Wallet", service='create_wallet',
+                                                    url="service:create_wallet", number_visits=1)
+        track_obj.save()
+    except:
+        print("error happened in the creation or update of object")
+    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/create_wallet.py'), 'r') as myfile:
@@ -210,7 +261,7 @@ def create_wallet(request):
                     obj.save()
                     populate_session_vars_from_database(request, did)
                     return render(request, "service/create_wallet.html", { 'output': True, 'wallet_mainchain': wallet_mainchain,
-                        'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth, 'sample_code': sample_code })
+                        'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth, 'sample_code': sample_code , 'recent_services':recent_services})
                 else:
                     messages.success(request, "Could not create wallet at this time. Please try again")
                     return redirect(reverse('service:create_wallet'))
@@ -221,11 +272,24 @@ def create_wallet(request):
                 wallet.close()
     else:
         form = CreateWalletForm(initial={'api_key': request.session['api_key']})
-        return render(request, 'service/create_wallet.html', {'output': False, 'form': form, 'sample_code': sample_code})
+        return render(request, 'service/create_wallet.html', {'output': False, 'form': form, 'sample_code': sample_code , 'recent_services':recent_services})
 
 
 @login_required
 def view_wallet(request):
+    did = request.session['did']
+    try:
+        track_obj = TrackUserService.objects.get(did=did, service='view_wallet')
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserService.objects.create(did=did, name="View Wallet", service='view_wallet',
+                                                    url="service:view_wallet", number_visits=1)
+        track_obj.save()
+    except:
+        print("error happened in the creation or update of object")
+    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/view_wallet.py'), 'r') as myfile:
@@ -283,7 +347,7 @@ def view_wallet(request):
                     address[chain] = content['address']
                     balance[chain] = content['balance']
                     return render(request, "service/view_wallet.html", { 'output': output, 'form': form_to_display,
-                        'address': address, 'balance': balance, 'sample_code': sample_code })
+                        'address': address, 'balance': balance, 'sample_code': sample_code  , 'recent_services':recent_services})
                 else:
                     messages.success(request, "Could not view wallet at this time. Please try again")
                     return redirect(reverse('service:view_wallet'))
@@ -293,11 +357,24 @@ def view_wallet(request):
             finally:
                 wallet.close()
     else:
-        return render(request, 'service/view_wallet.html', {'output': output, 'form': form_to_display, 'sample_code': sample_code})
+        return render(request, 'service/view_wallet.html', {'output': output, 'form': form_to_display, 'sample_code': sample_code , 'recent_services':recent_services})
         
 
 @login_required
 def request_ela(request):
+    did = request.session['did']
+    try:
+        track_obj = TrackUserService.objects.get(did=did, service='request_ela')
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserService.objects.create(did=did, name="Request ELA", service='request_ela',
+                                                    url="service:request_ela", number_visits=1)
+        track_obj.save()
+    except:
+        print("error happened in the creation or update of object")
+    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/request_ela.py'), 'r') as myfile:
@@ -355,7 +432,7 @@ def request_ela(request):
                     address[chain] = content['address']
                     deposit_amount[chain] = content['deposit_amount']
                     return render(request, "service/request_ela.html", { 'output': output, 'form': form_to_display,
-                        'address': address, 'deposit_amount': deposit_amount, 'sample_code': sample_code })
+                        'address': address, 'deposit_amount': deposit_amount, 'sample_code': sample_code ,'recent_services':recent_services })
                 else:
                     messages.success(request, "Could not view wallet at this time. Please try again")
                     return redirect(reverse('service:request_ela'))
@@ -365,11 +442,24 @@ def request_ela(request):
             finally:
                 wallet.close()
     else:
-        return render(request, 'service/request_ela.html', {'output': output, 'form': form_to_display, 'sample_code': sample_code})
+        return render(request, 'service/request_ela.html', {'output': output, 'form': form_to_display, 'sample_code': sample_code , 'recent_services':recent_services})
 
 
 @login_required
 def deploy_eth_contract(request):
+    did = request.session['did']
+    try:
+        track_obj = TrackUserService.objects.get(did=did, service='deploy_eth_contract')
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserService.objects.create(did=did, name="Deploy ETH Contract", service='deploy_eth_contract',
+                                                    url="service:deploy_eth_contract", number_visits=1)
+        track_obj.save()
+    except:
+        print("error happened in the creation or update of object")
+    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/deploy_eth_contract.py'), 'r') as myfile:
@@ -402,7 +492,7 @@ def deploy_eth_contract(request):
                     contract_code_hash = data['result']['contract_code_hash']
                     return render(request, "service/deploy_eth_contract.html",
                                   {"contract_address": contract_address, "contract_name": contract_name,
-                                   "contract_code_hash": contract_code_hash, 'output': True, 'sample_code': sample_code})
+                                   "contract_code_hash": contract_code_hash, 'output': True, 'sample_code': sample_code, 'recent_services':recent_services})
                 else:
                     messages.success(request, "Could not deploy smart contract to Eth sidechain. Please try again")
                     return redirect(reverse('service:deploy_eth_contract'))
@@ -413,11 +503,24 @@ def deploy_eth_contract(request):
                 sidechain_eth.close()
     else:
         form = DeployETHContractForm(initial={'did': did, 'api_key': request.session['api_key'], 'eth_account_address': request.session['address_eth'], 'eth_private_key': request.session['private_key_eth'], 'eth_gas': 2000000})
-        return render(request, "service/deploy_eth_contract.html", {'form': form, 'output': False, 'sample_code': sample_code})
+        return render(request, "service/deploy_eth_contract.html", {'form': form, 'output': False, 'sample_code': sample_code, 'recent_services':recent_services})
 
 
 @login_required
 def watch_eth_contract(request):
+    did = request.session['did']
+    try:
+        track_obj = TrackUserService.objects.get(did=did, service='watch_eth_contract')
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserService.objects.create(did=did, name="Watch ETH Contract", service='watch_eth_contract',
+                                                    url="service:watch_eth_contract", number_visits=1)
+        track_obj.save()
+    except:
+        print("error happened in the creation or update of object")
+    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/watch_eth_contract.py'), 'r') as myfile:
@@ -441,7 +544,7 @@ def watch_eth_contract(request):
                     contract_functions = data['result']['contract_functions']
                     contract_source = data['result']['contract_source']
                     return render(request, "service/watch_eth_contract.html", {'output': True, 'contract_address': contract_address, 'contract_name': contract_name,
-                                                                               'contract_functions': contract_functions, 'contract_source': contract_source, 'sample_code': sample_code})
+                                                                               'contract_functions': contract_functions, 'contract_source': contract_source, 'sample_code': sample_code , 'recent_services':recent_services})
                 else:
                     messages.success(request, "Could not view smart contract code at this time. Please try again")
                     return redirect(reverse('service:watch_eth_contract'))
@@ -452,21 +555,23 @@ def watch_eth_contract(request):
                 sidechain_eth.close()
     else:
         form = WatchETHContractForm(initial={'api_key': request.session['api_key']})
-        return render(request, 'service/watch_eth_contract.html', {'output': False, 'form': form, 'sample_code': sample_code})
+        return render(request, 'service/watch_eth_contract.html', {'output': False, 'form': form, 'sample_code': sample_code , 'recent_services':recent_services})
 
 
 @login_required
 def run_eth_contract(request):
+    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/run_eth_contract.py'), 'r') as myfile:
         sample_code['python'] = myfile.read()
     with open(os.path.join(module_dir, 'sample_code/go/run_eth_contract.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
-    return render(request, "service/run_eth_contract.html", {'sample_code': sample_code})
+    return render(request, "service/run_eth_contract.html", {'sample_code': sample_code , 'recent_services':recent_services})
 
 
 @login_required
 def suggest_service(request):
-    return render(request, "service/suggest_service.html")
+    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    return render(request, "service/suggest_service.html" , {'recent_services':recent_services})
 

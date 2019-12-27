@@ -90,3 +90,23 @@ Check all the available url routing currently available by the project
 ```
 python3 manage.py show_urls
 ```
+
+To track added services insert the following at the beginning:
+
+```
+    import .models TrackUserService
+
+    try:
+        track_obj = TrackUserService.objects.get(did= did , service='#internal service name')
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserService.objects.create(did=did, name = "#name to display to user", service='#internal service name' , url="#service url(service:_____)" , number_visits=1)
+        track_obj.save()
+    except:
+        print("error happened in the creation or update of object")
+    recent_services = TrackUserService.objects.filter(did= did).order_by('-last_visited')[:5]
+
+#pass the recent_services to the template as {'recent_services' :recent services}
+```
