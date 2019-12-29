@@ -20,7 +20,7 @@ from .forms import UploadAndSignForm, VerifyAndShowForm
 from .forms import CreateWalletForm, ViewWalletForm, RequestELAForm
 from .forms import DeployETHContractForm, WatchETHContractForm
 
-from .models import UploadFile, UserServiceSessionVars , TrackUserService
+from .models import UploadFile, UserServiceSessionVars , TrackUserPageVists
 from django.db import models
 from django.db.models import F
 
@@ -28,17 +28,8 @@ from django.db.models import F
 @login_required
 def generate_key(request):
     did = request.session['did']
-    try:
-        track_obj = TrackUserService.objects.get(did= did , service='generate_key')
-        track_obj.last_visited = timezone.now()
-        track_obj.number_visits = F('number_visits') + 1
-        track_obj.save()
-    except models.ObjectDoesNotExist:
-        track_obj = TrackUserService.objects.create(did=did, name = "Generate API Key", service='generate_key' , url="service:generate_key" , number_visits=1)
-        track_obj.save()
-    except:
-        print("error happened in the creation or update of object")
-    recent_services = TrackUserService.objects.filter(did= did).order_by('-last_visited')[:5]
+    track_page_visit(did, "Generate API Key" , 'generate_key' , "service:generate_key")
+    recent_services = TrackUserPageVists.objects.filter(did= did , is_service = True).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/generate_key.py'), 'r') as myfile:
@@ -95,18 +86,8 @@ def generate_key(request):
 @login_required
 def upload_and_sign(request):
     did = request.session['did']
-    try:
-        track_obj = TrackUserService.objects.get(did=did, service='upload_and_sign')
-        track_obj.last_visited = timezone.now()
-        track_obj.number_visits = F('number_visits') + 1
-        track_obj.save()
-    except models.ObjectDoesNotExist:
-        track_obj = TrackUserService.objects.create(did=did, name="Upload and Sign", service='upload_and_sign',
-                                                    url="service:upload_and_sign", number_visits=1)
-        track_obj.save()
-    except:
-        print("error happened in the creation or update of object")
-    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    track_page_visit(did , 'Upload And Sign' , 'upload_and_sign' , 'service:upload_and_sign')
+    recent_services = TrackUserPageVists.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/upload_and_sign.py'), 'r') as myfile:
@@ -161,18 +142,8 @@ def upload_and_sign(request):
 @login_required
 def verify_and_show(request):
     did = request.session['did']
-    try:
-        track_obj = TrackUserService.objects.get(did=did, service='verify_and_show')
-        track_obj.last_visited = timezone.now()
-        track_obj.number_visits = F('number_visits') + 1
-        track_obj.save()
-    except models.ObjectDoesNotExist:
-        track_obj = TrackUserService.objects.create(did=did, name="Verify and Show", service='verify_and_show',
-                                                    url="service:verify_and_show", number_visits=1)
-        track_obj.save()
-    except:
-        print("error happened in the creation or update of object")
-    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    track_page_visit(did , 'Verify And Show' , 'verify_and_show' , 'service:verify_and_show')
+    recent_services = TrackUserPageVists.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/verify_and_show.py'), 'r') as myfile:
@@ -213,18 +184,8 @@ def verify_and_show(request):
 @login_required
 def create_wallet(request):
     did = request.session['did']
-    try:
-        track_obj = TrackUserService.objects.get(did=did, service='create_wallet')
-        track_obj.last_visited = timezone.now()
-        track_obj.number_visits = F('number_visits') + 1
-        track_obj.save()
-    except models.ObjectDoesNotExist:
-        track_obj = TrackUserService.objects.create(did=did, name="Create Wallet", service='create_wallet',
-                                                    url="service:create_wallet", number_visits=1)
-        track_obj.save()
-    except:
-        print("error happened in the creation or update of object")
-    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    track_page_visit(did , 'Create Wallet','create_wallet', 'service:create_wallet')
+    recent_services = TrackUserPageVists.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/create_wallet.py'), 'r') as myfile:
@@ -278,18 +239,8 @@ def create_wallet(request):
 @login_required
 def view_wallet(request):
     did = request.session['did']
-    try:
-        track_obj = TrackUserService.objects.get(did=did, service='view_wallet')
-        track_obj.last_visited = timezone.now()
-        track_obj.number_visits = F('number_visits') + 1
-        track_obj.save()
-    except models.ObjectDoesNotExist:
-        track_obj = TrackUserService.objects.create(did=did, name="View Wallet", service='view_wallet',
-                                                    url="service:view_wallet", number_visits=1)
-        track_obj.save()
-    except:
-        print("error happened in the creation or update of object")
-    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    track_page_visit(did , 'View Wallet' , 'view_wallet' , 'service:view_wallet')
+    recent_services = TrackUserPageVists.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/view_wallet.py'), 'r') as myfile:
@@ -363,18 +314,8 @@ def view_wallet(request):
 @login_required
 def request_ela(request):
     did = request.session['did']
-    try:
-        track_obj = TrackUserService.objects.get(did=did, service='request_ela')
-        track_obj.last_visited = timezone.now()
-        track_obj.number_visits = F('number_visits') + 1
-        track_obj.save()
-    except models.ObjectDoesNotExist:
-        track_obj = TrackUserService.objects.create(did=did, name="Request ELA", service='request_ela',
-                                                    url="service:request_ela", number_visits=1)
-        track_obj.save()
-    except:
-        print("error happened in the creation or update of object")
-    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    track_page_visit(did , 'Request ELA' , 'request_ela' , 'service:request')
+    recent_services = TrackUserPageVists.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/request_ela.py'), 'r') as myfile:
@@ -448,18 +389,8 @@ def request_ela(request):
 @login_required
 def deploy_eth_contract(request):
     did = request.session['did']
-    try:
-        track_obj = TrackUserService.objects.get(did=did, service='deploy_eth_contract')
-        track_obj.last_visited = timezone.now()
-        track_obj.number_visits = F('number_visits') + 1
-        track_obj.save()
-    except models.ObjectDoesNotExist:
-        track_obj = TrackUserService.objects.create(did=did, name="Deploy ETH Contract", service='deploy_eth_contract',
-                                                    url="service:deploy_eth_contract", number_visits=1)
-        track_obj.save()
-    except:
-        print("error happened in the creation or update of object")
-    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    track_page_visit(did , 'Deploy ETH Contract', 'deploy_eth_contract' , 'service:deploy_eth_contract')
+    recent_services = TrackUserPageVists.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/deploy_eth_contract.py'), 'r') as myfile:
@@ -509,18 +440,8 @@ def deploy_eth_contract(request):
 @login_required
 def watch_eth_contract(request):
     did = request.session['did']
-    try:
-        track_obj = TrackUserService.objects.get(did=did, service='watch_eth_contract')
-        track_obj.last_visited = timezone.now()
-        track_obj.number_visits = F('number_visits') + 1
-        track_obj.save()
-    except models.ObjectDoesNotExist:
-        track_obj = TrackUserService.objects.create(did=did, name="Watch ETH Contract", service='watch_eth_contract',
-                                                    url="service:watch_eth_contract", number_visits=1)
-        track_obj.save()
-    except:
-        print("error happened in the creation or update of object")
-    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    track_page_visit(did , 'Watch ETH Contract' , 'watch_eth_contract' , 'service:watch_eth_contract')
+    recent_services = TrackUserPageVists.objects.filter(did=did).order_by('-last_visited')[:5]
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/watch_eth_contract.py'), 'r') as myfile:
@@ -560,7 +481,7 @@ def watch_eth_contract(request):
 
 @login_required
 def run_eth_contract(request):
-    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    recent_services = recent_queryset(request.session['did'])
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/run_eth_contract.py'), 'r') as myfile:
@@ -572,6 +493,22 @@ def run_eth_contract(request):
 
 @login_required
 def suggest_service(request):
-    recent_services = TrackUserService.objects.filter(did=did).order_by('-last_visited')[:5]
+    recent_services = recent_queryset(request.session['did'])
     return render(request, "service/suggest_service.html" , {'recent_services':recent_services})
 
+
+def track_page_visit(did , name , service , url ):
+    try:
+        track_obj = TrackUserPageVists.objects.get(did=did, page=service)
+        track_obj.last_visited = timezone.now()
+        track_obj.number_visits = F('number_visits') + 1
+        track_obj.save()
+    except models.ObjectDoesNotExist:
+        track_obj = TrackUserPageVists.objects.create(did=did, name=name, page=service,
+                                                    url=url, number_visits=1 , is_service=True)
+        track_obj.save()
+    except Exception as e:
+        print(e)
+
+def recent_queryset(did):
+    return TrackUserPageVists.objects.filter(did=did , is_service=True).order_by('-last_visited')[:5]
