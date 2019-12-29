@@ -2,7 +2,6 @@ import json
 import os
 
 from decouple import config
-from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 from console_main.views import login_required, populate_session_vars_from_database
@@ -41,7 +40,7 @@ def generate_key(request):
         if form.is_valid():
             try:
                 common = Common()
-                got_error = False
+                error_message = None
                 output = {}
                 if 'submit_get_api_key' in request.POST:
                     response = common.get_api_key_request(config('SHARED_SECRET_ADENINE'), did)
@@ -53,7 +52,7 @@ def generate_key(request):
                         populate_session_vars_from_database(request, did)
                         output['get_api_key'] = True
                     else:
-                        got_error = True
+                        error_message = response.status_message
                 elif 'submit_generate_api_key' in request.POST:
                     response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
                     if response.status:
@@ -64,15 +63,16 @@ def generate_key(request):
                         populate_session_vars_from_database(request, did)
                         output['generate_api_key'] = True
                     else:
-                        got_error = True
+                        error_message = response.status_message
                 else:
-                    got_error = True
-                if got_error:
-                    messages.success(request, "Could not generate an API key. Please try again")
+                    error_message = "Invalid form submission. Please refresh the page and try generating a new API " \
+                                    "key again "
+                if error_message:
+                    messages.success(request, error_message)
                     return redirect(reverse('service:generate_key'))
                 else:
                     request.session['api_key'] = api_key
-                    return render(request, "service/generate_key.html", {'output': output, 'api_key': api_key , 'recent_services':recent_services})
+                    return render(request, "service/generate_key.html", {'output': output, 'api_key': api_key , 'sample_code': sample_code, 'recent_services':recent_services})
             except Exception as e:
                 messages.success(request, "Could not generate an API key. Please try again")
                 return redirect(reverse('service:generate_key'))
@@ -88,13 +88,6 @@ def upload_and_sign(request):
     did = request.session['did']
     track_page_visit(did , 'Upload And Sign' , 'upload_and_sign' , 'service:upload_and_sign')
     recent_services = TrackUserPageVists.objects.filter(did=did).order_by('-last_visited')[:5]
-    sample_code = {}
-    module_dir = os.path.dirname(__file__)  
-    with open(os.path.join(module_dir, 'sample_code/python/upload_and_sign.py'), 'r') as myfile:
-        sample_code['python'] = myfile.read()
-    with open(os.path.join(module_dir, 'sample_code/go/upload_and_sign.go'), 'r') as myfile:
-        sample_code['go'] = myfile.read()
-    did = request.session['did']
     sample_code = {}
     module_dir = os.path.dirname(__file__)  
     with open(os.path.join(module_dir, 'sample_code/python/upload_and_sign.py'), 'r') as myfile:
@@ -127,7 +120,7 @@ def upload_and_sign(request):
                                   {"message_hash": message_hash, "public_key": public_key, "signature": signature,
                                    "file_hash": file_hash, 'output': True, 'sample_code': sample_code , 'recent_services':recent_services})
                 else:
-                    messages.success(request, "File could not be uploaded. Please try again")
+                    messages.success(request, response.status_message)
                     return redirect(reverse('service:upload_and_sign'))
             except Exception as e:
                 messages.success(request, "File could not be uploaded. Please try again")
@@ -169,7 +162,7 @@ def verify_and_show(request):
                     content = response.output
                     return render(request, 'service/verify_and_show.html', {'output': True, 'content': content, 'sample_code': sample_code , 'recent_services':recent_services})
                 else:
-                    messages.success(request, "File could not be verified nor shown. Please try again")
+                    messages.success(request, response.status_message)
                     return redirect(reverse('service:verify_and_show'))
             except Exception as e:
                 messages.success(request, "File could not be verified nor shown. Please try again")
@@ -224,7 +217,7 @@ def create_wallet(request):
                     return render(request, "service/create_wallet.html", { 'output': True, 'wallet_mainchain': wallet_mainchain,
                         'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth, 'sample_code': sample_code , 'recent_services':recent_services})
                 else:
-                    messages.success(request, "Could not create wallet at this time. Please try again")
+                    messages.success(request, response.status_message)
                     return redirect(reverse('service:create_wallet'))
             except Exception as e:
                 messages.success(request, "Could not create wallet at this time. Please try again")
@@ -300,7 +293,7 @@ def view_wallet(request):
                     return render(request, "service/view_wallet.html", { 'output': output, 'form': form_to_display,
                         'address': address, 'balance': balance, 'sample_code': sample_code  , 'recent_services':recent_services})
                 else:
-                    messages.success(request, "Could not view wallet at this time. Please try again")
+                    messages.success(request, response.status_message)
                     return redirect(reverse('service:view_wallet'))
             except Exception as e:
                 messages.success(request, "Could not view wallet at this time. Please try again")
@@ -375,7 +368,7 @@ def request_ela(request):
                     return render(request, "service/request_ela.html", { 'output': output, 'form': form_to_display,
                         'address': address, 'deposit_amount': deposit_amount, 'sample_code': sample_code ,'recent_services':recent_services })
                 else:
-                    messages.success(request, "Could not view wallet at this time. Please try again")
+                    messages.success(request, response.status_message)
                     return redirect(reverse('service:request_ela'))
             except Exception as e:
                 messages.success(request, "Could not view wallet at this time. Please try again")
@@ -425,7 +418,7 @@ def deploy_eth_contract(request):
                                   {"contract_address": contract_address, "contract_name": contract_name,
                                    "contract_code_hash": contract_code_hash, 'output': True, 'sample_code': sample_code, 'recent_services':recent_services})
                 else:
-                    messages.success(request, "Could not deploy smart contract to Eth sidechain. Please try again")
+                    messages.success(request, response.status_message)
                     return redirect(reverse('service:deploy_eth_contract'))
             except Exception as e:
                 messages.success(request, "Could not deploy smart contract to Eth sidechain. Please try again")
@@ -467,7 +460,7 @@ def watch_eth_contract(request):
                     return render(request, "service/watch_eth_contract.html", {'output': True, 'contract_address': contract_address, 'contract_name': contract_name,
                                                                                'contract_functions': contract_functions, 'contract_source': contract_source, 'sample_code': sample_code , 'recent_services':recent_services})
                 else:
-                    messages.success(request, "Could not view smart contract code at this time. Please try again")
+                    messages.success(request, response.status_message)
                     return redirect(reverse('service:watch_eth_contract'))
             except Exception as e:
                 messages.success(request, "Could not view smart contract code at this time. Please try again")

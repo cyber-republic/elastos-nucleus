@@ -1,4 +1,3 @@
-from django.contrib import messages
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -21,29 +20,28 @@ def login_required(function):
 
 
 def landing(request):
-    development = config('DEVELOPMENT', default=False, cast=bool)
-    context = {'development': development}
-    if development:
-        email = "test@nucleusconsole.com"
+    did_login = config('DIDLOGIN', default=False, cast=bool)
+    if not did_login:
+        email = config('SUPERUSER_USER')
         try:
             user = DIDUser.objects.get(email=email)
         except(TypeError, ValueError, OverflowError, DIDUser.DoesNotExist):
             user = DIDUser()
             user.email = email
-            user.name = "Test User"
-            user.set_password("admin")
-            user.did = "test"
-            user.is_active = True
-            user.is_staff = True
-            user.is_superuser = True
-            user.save()
+        user.name = "Test User"
+        user.set_password(config('SUPERUSER_PASSWORD'))
+        user.did = "test"
+        user.is_active = True
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         request.session['name'] = user.name
         request.session['email'] = user.email
         request.session['did'] = user.did
         request.session['logged_in'] = True
         populate_session_vars_from_database(request, user.did)
-    return render(request, 'landing.html', context)
+    return render(request, 'landing.html')
 
 
 def populate_session_vars_from_database(request, did):
