@@ -1,0 +1,42 @@
+package-lock.json
+node_modules/
+.DS_Store
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# pycharm
+__pycache__
+
+# VScode
+.VScode
+.vscode
+
+# idea
+.idea/
+
+# tools
+tools/privkey.pem
+tools/server.*
+tools/.postgres-data
+
+# static files
+www/
+
+# logs
+elastos-nucleus.log
+queries.log
+
+# uploaded files
+documents/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
