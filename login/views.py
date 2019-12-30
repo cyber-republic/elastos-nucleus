@@ -233,7 +233,7 @@ def feed(request):
     recent_pages = TrackUserPageVisits.objects.filter(did=did).order_by('-last_visited')[:5]
     recent_services = get_recent_services(did)
     most_visited_pages = TrackUserPageVisits.objects.filter(did=did).order_by('-number_visits')[:5]
-    return render(request, 'login/feed.html', {'recent_pages': recent_pages, 'recent_services': recent_services, 'most_visited_pages': most_visited_pages})
+    return render(request, 'login/register.html') #{'recent_pages': recent_pages, 'recent_services': recent_services, 'most_visited_pages': most_visited_pages})
 
 
 def sign_out(request):
