@@ -60,6 +60,8 @@
         </button>
         </a>
     {% else %}
+        <p>Either upload a file or fill in the "File content" field. The "File content"
+        field will overwrite the "Uploaded file" field</p>
        <form  class="form-group" method="post" enctype="multipart/form-data">
        {% csrf_token %}
        {{ form.as_p }}
