@@ -40,54 +40,60 @@ def generate_key(request):
         sample_code['go'] = myfile.read()
     if request.method == 'POST':
         form = GenerateAPIKeyForm(request.POST, initial={'did': did})
-        if form.is_valid():
-            try:
-                common = Common()
-                error_message = None
-                output = {}
-                if 'submit_get_api_key' in request.POST:
-                    response = common.get_api_key_request(config('SHARED_SECRET_ADENINE'), did)
-                    if response.status:
-                        api_key = response.api_key
-                        obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
-                                                                                       defaults={'did': did,
-                                                                                                 'api_key': api_key})
-                        obj.save()
-                        populate_session_vars_from_database(request, did)
-                        output['get_api_key'] = True
+        if not request.session['generate_key_submit']:
+            if form.is_valid():
+                try:
+                    common = Common()
+                    error_message = None
+                    output = {}
+                    if 'submit_get_api_key' in request.POST:
+                        response = common.get_api_key_request(config('SHARED_SECRET_ADENINE'), did)
+                        if response.status:
+                            api_key = response.api_key
+                            obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
+                                                                                           defaults={'did': did,
+                                                                                                     'api_key': api_key})
+                            obj.save()
+                            populate_session_vars_from_database(request, did)
+                            output['get_api_key'] = True
+                        else:
+                            error_message = response.status_message
+                    elif 'submit_generate_api_key' in request.POST:
+                        response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
+                        if response.status:
+                            api_key = response.api_key
+                            obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
+                                                                                           defaults={'did': did,
+                                                                                                     'api_key': api_key})
+                            obj.save()
+                            populate_session_vars_from_database(request, did)
+                            output['generate_api_key'] = True
+                        else:
+                            error_message = response.status_message
                     else:
-                        error_message = response.status_message
-                elif 'submit_generate_api_key' in request.POST:
-                    response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
-                    if response.status:
-                        api_key = response.api_key
-                        obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
-                                                                                       defaults={'did': did,
-                                                                                                 'api_key': api_key})
-                        obj.save()
-                        populate_session_vars_from_database(request, did)
-                        output['generate_api_key'] = True
+                        error_message = "Invalid form submission. Please refresh the page and try generating a new API " \
+                                        "key again "
+                    if error_message:
+                        messages.success(request, error_message)
+                        return redirect(reverse('service:generate_key'))
                     else:
-                        error_message = response.status_message
-                else:
-                    error_message = "Invalid form submission. Please refresh the page and try generating a new API " \
-                                    "key again "
-                if error_message:
-                    messages.success(request, error_message)
+                        request.session['api_key'] = api_key
+                        request.session['generate_key_submit'] = True
+                        return render(request, "service/generate_key.html",
+                                      {'output': output, 'api_key': api_key, 'sample_code': sample_code,
+                                       'recent_services': recent_services})
+                except Exception as e:
+                    logging.debug(f"did: {did} Method: generate_key Error: {e}")
+                    messages.success(request, "Could not generate an API key. Please try again")
                     return redirect(reverse('service:generate_key'))
-                else:
-                    request.session['api_key'] = api_key
-                    return render(request, "service/generate_key.html",
-                                  {'output': output, 'api_key': api_key, 'sample_code': sample_code,
-                                   'recent_services': recent_services})
-            except Exception as e:
-                logging.debug(f"did: {did} Method: generate_key Error: {e}")
-                messages.success(request, "Could not generate an API key. Please try again")
-                return redirect(reverse('service:generate_key'))
-            finally:
-                common.close()
+                finally:
+                    common.close()
+        else:
+            return redirect(reverse('service:generate_key'))
+
     else:
         form = GenerateAPIKeyForm(initial={'did': did})
+        request.session['generate_key_submit'] = False
         return render(request, "service/generate_key.html",
                       {'form': form, 'sample_code': sample_code, 'recent_services': recent_services})
 
@@ -213,68 +219,77 @@ def create_wallet(request):
     with open(os.path.join(module_dir, 'sample_code/go/create_wallet.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     if request.method == "POST":
-        form = CreateWalletForm(request.POST)
-        if form.is_valid():
-            network = form.cleaned_data.get('network')
-            api_key = form.cleaned_data.get('api_key')
-            try:
-                wallet = Wallet()
-                response = wallet.create_wallet(api_key)
-                if response.status:
-                    content = json.loads(response.output)['result']
-                    wallet_mainchain = content['mainchain']
-                    wallet_did = content['sidechain']['did']
-                    wallet_token = content['sidechain']['token']
-                    wallet_eth = content['sidechain']['eth']
-                    obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
-                                                                                   defaults={'did': did,
-                                                                                             'api_key': api_key,
-                                                                                             'mnemonic_mainchain':
-                                                                                                 wallet_mainchain[
-                                                                                                     'mnemonic'],
-                                                                                             'public_key_mainchain':
-                                                                                                 wallet_mainchain[
-                                                                                                     'public_key'],
-                                                                                             'private_key_mainchain':
-                                                                                                 wallet_mainchain[
-                                                                                                     'private_key'],
-                                                                                             'address_mainchain':
-                                                                                                 wallet_mainchain[
+        if not request.session['create_wallet_submit']:
+            print(request.POST)
+            form = CreateWalletForm(request.POST)
+            if form.is_valid():
+                network = form.cleaned_data.get('network')
+                api_key = form.cleaned_data.get('api_key')
+                try:
+                    wallet = Wallet()
+                    response = wallet.create_wallet(api_key)
+                    if response.status:
+                        content = json.loads(response.output)['result']
+                        wallet_mainchain = content['mainchain']
+                        wallet_did = content['sidechain']['did']
+                        wallet_token = content['sidechain']['token']
+                        wallet_eth = content['sidechain']['eth']
+                        obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
+                                                                                       defaults={'did': did,
+                                                                                                 'api_key': api_key,
+                                                                                                 'mnemonic_mainchain':
+                                                                                                     wallet_mainchain[
+                                                                                                         'mnemonic'],
+                                                                                                 'public_key_mainchain':
+                                                                                                     wallet_mainchain[
+                                                                                                         'public_key'],
+                                                                                                 'private_key_mainchain':
+                                                                                                     wallet_mainchain[
+                                                                                                         'private_key'],
+                                                                                                 'address_mainchain':
+                                                                                                     wallet_mainchain[
+                                                                                                         'address'],
+                                                                                                 'private_key_did':
+                                                                                                     wallet_did[
+                                                                                                         'private_key'],
+                                                                                                 'public_key_did':
+                                                                                                     wallet_did[
+                                                                                                         'public_key'],
+                                                                                                 'address_did': wallet_did[
                                                                                                      'address'],
-                                                                                             'private_key_did':
-                                                                                                 wallet_did[
-                                                                                                     'private_key'],
-                                                                                             'public_key_did':
-                                                                                                 wallet_did[
-                                                                                                     'public_key'],
-                                                                                             'address_did': wallet_did[
-                                                                                                 'address'],
-                                                                                             'did_did': wallet_did[
-                                                                                                 'did'],
-                                                                                             'address_eth': wallet_eth[
-                                                                                                 'address'],
-                                                                                             'private_key_eth':
-                                                                                                 wallet_eth[
-                                                                                                     'private_key']})
-                    obj.save()
-                    populate_session_vars_from_database(request, did)
-                    return render(request, "service/create_wallet.html",
-                                  {'output': True, 'wallet_mainchain': wallet_mainchain,
-                                   'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth,
-                                   'sample_code': sample_code, 'recent_services': recent_services})
-                else:
-                    messages.success(request, response.status_message)
+                                                                                                 'did_did': wallet_did[
+                                                                                                     'did'],
+                                                                                                 'address_eth': wallet_eth[
+                                                                                                     'address'],
+                                                                                                 'private_key_eth':
+                                                                                                     wallet_eth[
+                                                                                                         'private_key']})
+                        obj.save()
+                        populate_session_vars_from_database(request, did)
+                        request.session['create_wallet_submit'] = True
+                        return render(request, "service/create_wallet.html",
+                                      {'output': True, 'wallet_mainchain': wallet_mainchain,
+                                       'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth,
+                                       'sample_code': sample_code, 'recent_services': recent_services})
+                    else:
+                        messages.success(request, response.status_message)
+                        return redirect(reverse('service:create_wallet'))
+                except Exception as e:
+                    logging.debug(f"did: {did} Method: create_wallet Error: {e}")
+                    messages.success(request, "Could not create wallet at this time. Please try again")
                     return redirect(reverse('service:create_wallet'))
-            except Exception as e:
-                logging.debug(f"did: {did} Method: create_wallet Error: {e}")
-                messages.success(request, "Could not create wallet at this time. Please try again")
-                return redirect(reverse('service:create_wallet'))
-            finally:
-                wallet.close()
+                finally:
+                    wallet.close()
+        else:
+            return redirect(reverse('service:create_wallet'))
     else:
+        request.session['create_wallet_submit'] = False
         form = CreateWalletForm(initial={'api_key': request.session['api_key']})
         return render(request, 'service/create_wallet.html',
                       {'output': False, 'form': form, 'sample_code': sample_code, 'recent_services': recent_services})
+
+
+
 
 
 @login_required
