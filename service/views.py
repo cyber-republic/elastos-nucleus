@@ -39,8 +39,8 @@ def generate_key(request):
     with open(os.path.join(module_dir, 'sample_code/go/generate_key.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     if request.method == 'POST':
-        form = GenerateAPIKeyForm(request.POST, initial={'did': did})
         if not request.session['generate_key_submit']:
+            form = GenerateAPIKeyForm(request.POST, initial={'did': did})
             if form.is_valid():
                 try:
                     common = Common()
@@ -77,8 +77,8 @@ def generate_key(request):
                         messages.success(request, error_message)
                         return redirect(reverse('service:generate_key'))
                     else:
-                        request.session['api_key'] = api_key
                         request.session['generate_key_submit'] = True
+                        request.session['api_key'] = api_key
                         return render(request, "service/generate_key.html",
                                       {'output': output, 'api_key': api_key, 'sample_code': sample_code,
                                        'recent_services': recent_services})
@@ -88,12 +88,9 @@ def generate_key(request):
                     return redirect(reverse('service:generate_key'))
                 finally:
                     common.close()
-        else:
-            return redirect(reverse('service:generate_key'))
-
     else:
-        form = GenerateAPIKeyForm(initial={'did': did})
         request.session['generate_key_submit'] = False
+        form = GenerateAPIKeyForm(initial={'did': did})
         return render(request, "service/generate_key.html",
                       {'form': form, 'sample_code': sample_code, 'recent_services': recent_services})
 
@@ -110,9 +107,10 @@ def upload_and_sign(request):
     with open(os.path.join(module_dir, 'sample_code/go/upload_and_sign.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     if request.method == 'POST':
-        # Purge old requests for housekeeping.
         if not request.session['upload_and_sign_submit']:
+            # Purge old requests for housekeeping.
             UploadFile.objects.filter(did=did).delete()
+
             form = UploadAndSignForm(request.POST, request.FILES, initial={'did': did})
             if form.is_valid():
                 network = form.cleaned_data.get('network')
@@ -134,11 +132,11 @@ def upload_and_sign(request):
                     response = hive.upload_and_sign(api_key, private_key, file_path)
                     data = json.loads(response.output)
                     if response.status:
+                        request.session['upload_and_sign_submit'] = True
                         message_hash = data['result']['msg']
                         public_key = data['result']['pub']
                         signature = data['result']['sig']
                         file_hash = data['result']['hash']
-                        request.session['upload_and_sign_submit'] = True
                         return render(request, "service/upload_and_sign.html",
                                       {"message_hash": message_hash, "public_key": public_key, "signature": signature,
                                        "file_hash": file_hash, 'output': True, 'sample_code': sample_code,
@@ -153,8 +151,6 @@ def upload_and_sign(request):
                 finally:
                     temp_file.delete()
                     hive.close()
-        else:
-            return redirect(reverse('service:upload_and_sign'))
     else:
         request.session['upload_and_sign_submit'] = False
         form = UploadAndSignForm(initial={'did': did, 'api_key': request.session['api_key'],
@@ -191,8 +187,8 @@ def verify_and_show(request):
                     hive = Hive()
                     response = hive.verify_and_show(api_key, request_input)
                     if response.status:
-                        content = json.loads(response.output)["result"]["output"]
                         request.session['verify_and_show_submit'] = True
+                        content = json.loads(response.output)["result"]["output"]
                         return render(request, 'service/verify_and_show.html',
                                       {'output': True, 'content': content, 'sample_code': sample_code,
                                        'recent_services': recent_services})
@@ -205,8 +201,6 @@ def verify_and_show(request):
                     return redirect(reverse('service:verify_and_show'))
                 finally:
                     hive.close()
-        else:
-            return redirect(reverse('service:verify_and_show'))
     else:
         request.session['verify_and_show_submit'] = False
         form = VerifyAndShowForm(
@@ -229,7 +223,6 @@ def create_wallet(request):
         sample_code['go'] = myfile.read()
     if request.method == "POST":
         if not request.session['create_wallet_submit']:
-            print(request.POST)
             form = CreateWalletForm(request.POST)
             if form.is_valid():
                 network = form.cleaned_data.get('network')
@@ -238,6 +231,7 @@ def create_wallet(request):
                     wallet = Wallet()
                     response = wallet.create_wallet(api_key)
                     if response.status:
+                        request.session['create_wallet_submit'] = True
                         content = json.loads(response.output)['result']
                         wallet_mainchain = content['mainchain']
                         wallet_did = content['sidechain']['did']
@@ -275,7 +269,6 @@ def create_wallet(request):
                                                                                                          'private_key']})
                         obj.save()
                         populate_session_vars_from_database(request, did)
-                        request.session['create_wallet_submit'] = True
                         return render(request, "service/create_wallet.html",
                                       {'output': True, 'wallet_mainchain': wallet_mainchain,
                                        'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth,
@@ -289,16 +282,11 @@ def create_wallet(request):
                     return redirect(reverse('service:create_wallet'))
                 finally:
                     wallet.close()
-        else:
-            return redirect(reverse('service:create_wallet'))
     else:
         request.session['create_wallet_submit'] = False
         form = CreateWalletForm(initial={'api_key': request.session['api_key']})
         return render(request, 'service/create_wallet.html',
                       {'output': False, 'form': form, 'sample_code': sample_code, 'recent_services': recent_services})
-
-
-
 
 
 @login_required
@@ -413,63 +401,58 @@ def request_ela(request):
         'eth': False
     }
     if request.method == "POST":
-        if not request.session['request_ela_submit']:
-            address = {
-                'mainchain': '',
-                'did': '',
-                'token': '',
-                'eth': ''
-            }
-            deposit_amount = {
-                'mainchain': 0,
-                'did': 0,
-                'token': 0,
-                'eth': 0
-            }
-            if 'submit_mainchain' in request.POST:
-                chain = 'mainchain'
-                form = RequestELAForm(request.POST, initial={'chain': chain})
-            elif 'submit_did' in request.POST:
-                chain = 'did'
-                form = RequestELAForm(request.POST, initial={'chain': chain})
-            elif 'submit_token' in request.POST:
-                chain = 'token'
-                form = RequestELAForm(request.POST, initial={'chain': chain})
-            elif 'submit_eth' in request.POST:
-                chain = 'eth'
-                form = RequestELAForm(request.POST, initial={'chain': chain})
+        address = {
+            'mainchain': '',
+            'did': '',
+            'token': '',
+            'eth': ''
+        }
+        deposit_amount = {
+            'mainchain': 0,
+            'did': 0,
+            'token': 0,
+            'eth': 0
+        }
+        if 'submit_mainchain' in request.POST:
+            chain = 'mainchain'
+            form = RequestELAForm(request.POST, initial={'chain': chain})
+        elif 'submit_did' in request.POST:
+            chain = 'did'
+            form = RequestELAForm(request.POST, initial={'chain': chain})
+        elif 'submit_token' in request.POST:
+            chain = 'token'
+            form = RequestELAForm(request.POST, initial={'chain': chain})
+        elif 'submit_eth' in request.POST:
+            chain = 'eth'
+            form = RequestELAForm(request.POST, initial={'chain': chain})
 
-            if form.is_valid():
-                network = form.cleaned_data.get('network')
-                api_key = form.cleaned_data.get('api_key')
-                addr = form.cleaned_data.get('address')
-                try:
-                    wallet = Wallet()
-                    response = wallet.request_ela(api_key, chain, addr)
-                    if response.status:
-                        output[chain] = True
-                        content = json.loads(response.output)['result']
-                        address[chain] = content['address']
-                        deposit_amount[chain] = content['deposit_amount']
-                        request.session['request_ela_submit'] = True
-                        return render(request, "service/request_ela.html", {'output': output, 'form': form_to_display,
-                                                                            'address': address,
-                                                                            'deposit_amount': deposit_amount,
-                                                                            'sample_code': sample_code,
-                                                                            'recent_services': recent_services})
-                    else:
-                        messages.success(request, response.status_message)
-                        return redirect(reverse('service:request_ela'))
-                except Exception as e:
-                    logging.debug(f"did: {did} Method: request_ela Error: {e}")
-                    messages.success(request, "Could not view wallet at this time. Please try again")
+        if form.is_valid():
+            network = form.cleaned_data.get('network')
+            api_key = form.cleaned_data.get('api_key')
+            addr = form.cleaned_data.get('address')
+            try:
+                wallet = Wallet()
+                response = wallet.request_ela(api_key, chain, addr)
+                if response.status:
+                    output[chain] = True
+                    content = json.loads(response.output)['result']
+                    address[chain] = content['address']
+                    deposit_amount[chain] = content['deposit_amount']
+                    return render(request, "service/request_ela.html", {'output': output, 'form': form_to_display,
+                                                                        'address': address,
+                                                                        'deposit_amount': deposit_amount,
+                                                                        'sample_code': sample_code,
+                                                                        'recent_services': recent_services})
+                else:
+                    messages.success(request, response.status_message)
                     return redirect(reverse('service:request_ela'))
-                finally:
-                    wallet.close()
-        else:
-            return redirect(reverse('service:request_ela'))
+            except Exception as e:
+                logging.debug(f"did: {did} Method: request_ela Error: {e}")
+                messages.success(request, "Could not view wallet at this time. Please try again")
+                return redirect(reverse('service:request_ela'))
+            finally:
+                wallet.close()
     else:
-        request.session['request_ela_submit'] = False
         return render(request, 'service/request_ela.html',
                       {'output': output, 'form': form_to_display, 'sample_code': sample_code,
                        'recent_services': recent_services})
@@ -488,9 +471,10 @@ def deploy_eth_contract(request):
         sample_code['go'] = myfile.read()
     did = request.session['did']
     if request.method == 'POST':
-        # Purge old requests for housekeeping.
         if not request.session['deploy_eth_contract_submit']:
+            # Purge old requests for housekeeping.
             UploadFile.objects.filter(did=did).delete()
+
             form = DeployETHContractForm(request.POST, request.FILES, initial={'did': did})
             if form.is_valid():
                 network = form.cleaned_data.get('network')
@@ -507,11 +491,11 @@ def deploy_eth_contract(request):
                                                                  file_path)
                     data = json.loads(response.output)
                     if response.status:
+                        request.session['deploy_eth_contract_submit'] = True
                         temp_file.delete()
                         contract_address = data['result']['contract_address']
                         contract_name = data['result']['contract_name']
                         contract_code_hash = data['result']['contract_code_hash']
-                        request.session['deploy_eth_contract_submit'] = True
                         return render(request, "service/deploy_eth_contract.html",
                                       {"contract_address": contract_address, "contract_name": contract_name,
                                        "contract_code_hash": contract_code_hash, 'output': True, 'sample_code': sample_code,
@@ -525,10 +509,8 @@ def deploy_eth_contract(request):
                     return redirect(reverse('service:deploy_eth_contract'))
                 finally:
                     sidechain_eth.close()
-        else:
-            return redirect(reverse('service:deploy_eth_contract'))
     else:
-        request.session['deploy_eth_submit'] = False
+        request.session['deploy_eth_contract_submit'] = False
         form = DeployETHContractForm(initial={'did': did, 'api_key': request.session['api_key'],
                                               'eth_account_address': request.session['address_eth'],
                                               'eth_private_key': request.session['private_key_eth'],
@@ -563,10 +545,10 @@ def watch_eth_contract(request):
                                                                 contract_code_hash)
                     data = json.loads(response.output)
                     if response.status:
+                        request.session['watch_eth_contract_submit'] = True
                         contract_address = data['result']['contract_address']
                         contract_functions = data['result']['contract_functions']
                         contract_source = data['result']['contract_source']
-                        request.session['watch_eth_contract_submit'] = True
                         return render(request, "service/watch_eth_contract.html",
                                       {'output': True, 'contract_address': contract_address, 'contract_name': contract_name,
                                        'contract_functions': contract_functions, 'contract_source': contract_source,
@@ -581,10 +563,8 @@ def watch_eth_contract(request):
                     return redirect(reverse('service:watch_eth_contract'))
                 finally:
                     sidechain_eth.close()
-        else:
-            return redirect(reverse('service:watch_eth_contract'))
     else:
-        request.session['watch_eth_contract_submit'] = True
+        request.session['watch_eth_contract_submit'] = False
         form = WatchETHContractForm(initial={'api_key': request.session['api_key']})
         return render(request, 'service/watch_eth_contract.html',
                       {'output': False, 'form': form, 'sample_code': sample_code, 'recent_services': recent_services})
@@ -611,4 +591,3 @@ def suggest_service(request):
     track_page_visit(did, 'Suggest a new service', 'service:suggest_service', True)
     recent_services = get_recent_services(did)
     return render(request, "service/suggest_service.html", {'recent_services': recent_services})
-
