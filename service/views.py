@@ -142,7 +142,7 @@ def upload_and_sign(request):
                         public_key = data['result']['pub']
                         signature = data['result']['sig']
                         file_hash = data['result']['hash']
-                        if network == 'GMUnet' or network == 'gmunet':
+                        if network == 'gmunet':
                             SavedFileInformation.objects.update_or_create(did = did , file_name = temp_file.filename(), message_hash = message_hash , signature = signature , file_hash = file_hash)
                         return render(request, "service/upload_and_sign.html",
                                       {"message_hash": message_hash, "public_key": public_key, "signature": signature,
