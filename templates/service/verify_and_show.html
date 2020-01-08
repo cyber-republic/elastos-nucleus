@@ -6,52 +6,62 @@
 {% endblock title %}
 
 {% block scripts %}
-
-<script src="{% static "/javascript/VerifyAndShow.js" %}" type="text/javascript"></script>
-
+    <script src="{% static "/javascript/VerifyAndShow.js" %}" type="text/javascript"></script>
 {% endblock %}
 
-{% block related %}
+{% block related_services %}
   <li>
     <a href="#">
-      One Service
+      1st Service
     </a>
   </li>
   <li>
     <a href="#">
-      Two Service
+      2nd Service
     </a>
   </li>
   <li>
     <a href="#">
-      Red Service
+      3rd Service
     </a>
   </li>
   <li>
     <a href="#">
-      Blue Service
+      4th Service
     </a>
   </li>
-{% endblock related %}
+  <li>
+    <a href="#">
+      5th Service
+    </a>
+  </li>
+{% endblock related_services %}
 
 {% block documentation %}
-<li class="toc-entry toc-h2">
+  <li>
     <a href="#">One Example</a>
   </li>
-  <li class="toc-entry toc-h2">
+  <li>
     <a href="#">Two Example</a>
   </li>
-  <li class="toc-entry toc-h2">
+  <li>
     <a href="#">Red Example</a>
   </li>
-  <li class="toc-entry toc-h2">
+  <li>
     <a href="#">Blue Example</a>
   </li>
 {% endblock documentation %}
 
+{% block serviceicon %}
+    <img src="{% static 'images/common/show.svg' %}"/>
+{% endblock serviceicon %}
 {% block servicetitle %}
-<h5 class="card-header">Verify and Show Content</h5>
-{% endblock servicetitle %} 
+    Verify and Show Content
+{% endblock servicetitle %}
+
+{% block description %}
+    The description of the Verify and Show service goes here.
+{% endblock description %}
 
 {% block service %}
     {% if output %}
@@ -62,14 +72,9 @@
         </a>
     {% else %}
          <form class="form-group" method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-           <button type="submit" >Submit</button>
+             {% csrf_token %}
+             {{ form.as_p }}
+            <button type="submit" >Submit</button>
          </form>
     {% endif %}
-
-{% endblock service %} 
-
-{% block description %}
-<p>The description of the Verify and Show service goes here.</p>
-{% endblock description %}
+{% endblock service %}

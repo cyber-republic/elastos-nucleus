@@ -7,8 +7,6 @@ from django.http import HttpResponse,JsonResponse
 
 from decouple import config
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
-from django.core.files.temp import NamedTemporaryFile
 from django.shortcuts import render, redirect
 from django.utils.crypto import get_random_string
 
@@ -27,7 +25,7 @@ from .forms import UploadAndSignForm, VerifyAndShowForm
 from .forms import CreateWalletForm, ViewWalletForm, RequestELAForm
 from .forms import DeployETHContractForm, WatchETHContractForm
 
-from .models import UploadFile, UserServiceSessionVars , SavedFileInformation
+from .models import UploadFile, UserServiceSessionVars, SavedFileInformation
 
 
 @login_required
@@ -42,59 +40,54 @@ def generate_key(request):
     with open(os.path.join(module_dir, 'sample_code/go/generate_key.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     if request.method == 'POST':
-        if not request.session['generate_key_submit']:
-            form = GenerateAPIKeyForm(request.POST, initial={'did': did})
-            if form.is_valid():
-                try:
-                    common = Common()
-                    error_message = None
-                    output = {}
-                    if 'submit_get_api_key' in request.POST:
-                        response = common.get_api_key_request(config('SHARED_SECRET_ADENINE'), did)
-                        if response.status:
-                            api_key = response.api_key
-                            obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
-                                                                                           defaults={'did': did,
-                                                                                                     'api_key': api_key})
-                            obj.save()
-                            populate_session_vars_from_database(request, did)
-                            output['get_api_key'] = True
-                        else:
-                            error_message = response.status_message
-                    elif 'submit_generate_api_key' in request.POST:
-                        response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
-                        if response.status:
-                            api_key = response.api_key
-                            obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
-                                                                                           defaults={'did': did,
-                                                                                                     'api_key': api_key})
-                            obj.save()
-                            populate_session_vars_from_database(request, did)
-                            output['generate_api_key'] = True
-                        else:
-                            error_message = response.status_message
+        form = GenerateAPIKeyForm(request.POST, initial={'did': did})
+        if form.is_valid():
+            try:
+                common = Common()
+                error_message = None
+                output = {}
+                if 'submit_get_api_key' in request.POST:
+                    response = common.get_api_key_request(config('SHARED_SECRET_ADENINE'), did)
+                    if response.status:
+                        api_key = response.api_key
+                        obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
+                                                                                       defaults={'did': did,
+                                                                                                 'api_key': api_key})
+                        obj.save()
+                        populate_session_vars_from_database(request, did)
+                        output['get_api_key'] = True
                     else:
-                        error_message = "Invalid form submission. Please refresh the page and try generating a new API " \
-                                        "key again "
-                    if error_message:
-                        messages.success(request, error_message)
-                        return redirect(reverse('service:generate_key'))
+                        error_message = response.status_message
+                elif 'submit_generate_api_key' in request.POST:
+                    response = common.generate_api_request(config('SHARED_SECRET_ADENINE'), did)
+                    if response.status:
+                        api_key = response.api_key
+                        obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
+                                                                                       defaults={'did': did,
+                                                                                                 'api_key': api_key})
+                        obj.save()
+                        populate_session_vars_from_database(request, did)
+                        output['generate_api_key'] = True
                     else:
-                        request.session['generate_key_submit'] = True
-                        request.session['api_key'] = api_key
-                        return render(request, "service/generate_key.html",
-                                      {'output': output, 'api_key': api_key, 'sample_code': sample_code,
-                                       'recent_services': recent_services})
-                except Exception as e:
-                    logging.debug(f"did: {did} Method: generate_key Error: {e}")
-                    messages.success(request, "Could not generate an API key. Please try again")
+                        error_message = response.status_message
+                else:
+                    error_message = "Invalid form submission. Please refresh the page and try generating a new API " \
+                                    "key again "
+                if error_message:
+                    messages.success(request, error_message)
                     return redirect(reverse('service:generate_key'))
-                finally:
-                    common.close()
-        else:
-            return redirect(reverse('service:generate_key'))
+                else:
+                    request.session['api_key'] = api_key
+                    return render(request, "service/generate_key.html",
+                                  {'output': output, 'api_key': api_key, 'sample_code': sample_code,
+                                   'recent_services': recent_services})
+            except Exception as e:
+                logging.debug(f"did: {did} Method: generate_key Error: {e}")
+                messages.success(request, "Could not generate an API key. Please try again")
+                return redirect(reverse('service:generate_key'))
+            finally:
+                common.close()
     else:
-        request.session['generate_key_submit'] = False
         form = GenerateAPIKeyForm(initial={'did': did})
         return render(request, "service/generate_key.html",
                       {'form': form, 'sample_code': sample_code, 'recent_services': recent_services})
@@ -115,6 +108,7 @@ def upload_and_sign(request):
         if not request.session['upload_and_sign_submit']:
             # Purge old requests for housekeeping.
             UploadFile.objects.filter(did=did).delete()
+
             form = UploadAndSignForm(request.POST, request.FILES, initial={'did': did})
             if form.is_valid():
                 network = form.cleaned_data.get('network')
@@ -125,7 +119,6 @@ def upload_and_sign(request):
                 if file_content:
                     obj, created = UploadFile.objects.update_or_create(did=did)
                     obj.uploaded_file.save(get_random_string(length=32), ContentFile(file_content))
-
                 try:
                     temp_file = UploadFile.objects.get(did=did)
                     file_path = temp_file.uploaded_file.path
@@ -143,7 +136,9 @@ def upload_and_sign(request):
                         signature = data['result']['sig']
                         file_hash = data['result']['hash']
                         if network == 'gmunet':
-                            SavedFileInformation.objects.update_or_create(did = did , file_name = temp_file.filename(), message_hash = message_hash , signature = signature , file_hash = file_hash)
+                            SavedFileInformation.objects.update_or_create(did=did, file_name=temp_file.filename(),
+                                                                          message_hash=message_hash,
+                                                                          signature=signature, file_hash=file_hash)
                         return render(request, "service/upload_and_sign.html",
                                       {"message_hash": message_hash, "public_key": public_key, "signature": signature,
                                        "file_hash": file_hash, 'output': True, 'sample_code': sample_code,
@@ -179,20 +174,18 @@ def verify_and_show(request):
         sample_code['python'] = myfile.read()
     with open(os.path.join(module_dir, 'sample_code/go/verify_and_show.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
-
     if request.is_ajax():
         filename = request.POST.get('file_name')
         try:
-            userFile  = SavedFileInformation.objects.filter(did = did, file_name=filename)
+            userFile = SavedFileInformation.objects.filter(did=did, file_name=filename)
             data = serializers.serialize('json' , userFile)
             data = data[1:-1]
-            return HttpResponse(data ,content_type='application/json')
+            return JsonResponse(data, status=200)
         except Exception as e:
             return redirect(reverse('service:verify_and_show'))
-
     elif request.method == 'POST':
         if not request.session['verify_and_show_submit']:
-            form = VerifyAndShowForm(request.POST , did=did)
+            form = VerifyAndShowForm(request.POST, did=did)
             if form.is_valid():
                 network = form.cleaned_data.get('network')
                 api_key = form.cleaned_data.get('api_key')
@@ -227,7 +220,7 @@ def verify_and_show(request):
         request.session['verify_and_show_submit'] = False
         form = VerifyAndShowForm(
             initial={'api_key': request.session['api_key'], 'private_key': request.session['private_key_mainchain'],
-                     'public_key': request.session['public_key_mainchain']} , did = did)
+                     'public_key': request.session['public_key_mainchain']}, did=did)
         return render(request, 'service/verify_and_show.html',
                       {'output': False, 'form': form, 'sample_code': sample_code, 'recent_services': recent_services})
 
@@ -280,12 +273,14 @@ def create_wallet(request):
                                                                                                  'public_key_did':
                                                                                                      wallet_did[
                                                                                                          'public_key'],
-                                                                                                 'address_did': wallet_did[
-                                                                                                     'address'],
+                                                                                                 'address_did':
+                                                                                                     wallet_did[
+                                                                                                         'address'],
                                                                                                  'did_did': wallet_did[
                                                                                                      'did'],
-                                                                                                 'address_eth': wallet_eth[
-                                                                                                     'address'],
+                                                                                                 'address_eth':
+                                                                                                     wallet_eth[
+                                                                                                         'address'],
                                                                                                  'private_key_eth':
                                                                                                      wallet_eth[
                                                                                                          'private_key']})
@@ -449,38 +444,34 @@ def request_ela(request):
         elif 'submit_eth' in request.POST:
             chain = 'eth'
             form = RequestELAForm(request.POST, initial={'chain': chain})
-        if not request.session['request_ela_submit']:
-            if form.is_valid():
-                request.session['request_ela_submit'] = True
-                network = form.cleaned_data.get('network')
-                api_key = form.cleaned_data.get('api_key')
-                addr = form.cleaned_data.get('address')
-                try:
-                    wallet = Wallet()
-                    response = wallet.request_ela(api_key, chain, addr)
-                    if response.status:
-                        output[chain] = True
-                        content = json.loads(response.output)['result']
-                        address[chain] = content['address']
-                        deposit_amount[chain] = content['deposit_amount']
-                        return render(request, "service/request_ela.html", {'output': output, 'form': form_to_display,
-                                                                            'address': address,
-                                                                            'deposit_amount': deposit_amount,
-                                                                            'sample_code': sample_code,
-                                                                            'recent_services': recent_services})
-                    else:
-                        messages.success(request, response.status_message)
-                        return redirect(reverse('service:request_ela'))
-                except Exception as e:
-                    logging.debug(f"did: {did} Method: request_ela Error: {e}")
-                    messages.success(request, "Could not view wallet at this time. Please try again")
+
+        if form.is_valid():
+            network = form.cleaned_data.get('network')
+            api_key = form.cleaned_data.get('api_key')
+            addr = form.cleaned_data.get('address')
+            try:
+                wallet = Wallet()
+                response = wallet.request_ela(api_key, chain, addr)
+                if response.status:
+                    output[chain] = True
+                    content = json.loads(response.output)['result']
+                    address[chain] = content['address']
+                    deposit_amount[chain] = content['deposit_amount']
+                    return render(request, "service/request_ela.html", {'output': output, 'form': form_to_display,
+                                                                        'address': address,
+                                                                        'deposit_amount': deposit_amount,
+                                                                        'sample_code': sample_code,
+                                                                        'recent_services': recent_services})
+                else:
+                    messages.success(request, response.status_message)
                     return redirect(reverse('service:request_ela'))
-                finally:
-                    wallet.close()
-        else:
-            return redirect(reverse('service:request_ela'))
+            except Exception as e:
+                logging.debug(f"did: {did} Method: request_ela Error: {e}")
+                messages.success(request, "Could not view wallet at this time. Please try again")
+                return redirect(reverse('service:request_ela'))
+            finally:
+                wallet.close()
     else:
-        request.session['request_ela_submit'] = False
         return render(request, 'service/request_ela.html',
                       {'output': output, 'form': form_to_display, 'sample_code': sample_code,
                        'recent_services': recent_services})
@@ -526,7 +517,8 @@ def deploy_eth_contract(request):
                         contract_code_hash = data['result']['contract_code_hash']
                         return render(request, "service/deploy_eth_contract.html",
                                       {"contract_address": contract_address, "contract_name": contract_name,
-                                       "contract_code_hash": contract_code_hash, 'output': True, 'sample_code': sample_code,
+                                       "contract_code_hash": contract_code_hash, 'output': True,
+                                       'sample_code': sample_code,
                                        'recent_services': recent_services})
                     else:
                         messages.success(request, response.status_message)
@@ -580,7 +572,8 @@ def watch_eth_contract(request):
                         contract_functions = data['result']['contract_functions']
                         contract_source = data['result']['contract_source']
                         return render(request, "service/watch_eth_contract.html",
-                                      {'output': True, 'contract_address': contract_address, 'contract_name': contract_name,
+                                      {'output': True, 'contract_address': contract_address,
+                                       'contract_name': contract_name,
                                        'contract_functions': contract_functions, 'contract_source': contract_source,
                                        'sample_code': sample_code,
                                        'recent_services': recent_services})
