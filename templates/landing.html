@@ -9,21 +9,19 @@
 {% block scripts %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/landing.css' %}"/>
     <script>
-      function myFunction() {
-        document.getElementById("myDropdown").classList.toggle("show");
-      }
-
-      window.onclick = function(e) {
-        if (!e.target.matches(".dropbtn")) {
-          var myDropdown = document.getElementById("myDropdown");
-          if (myDropdown.classList.contains("show")) {
-            myDropdown.classList.remove("show");
-          }
+        function myFunction() {
+            document.getElementById("myDropdown").classList.toggle("show");
         }
-      };
 
+        window.onclick = function(e) {
+            if (!e.target.matches(".dropbtn")) {
+                var myDropdown = document.getElementById("myDropdown");
+                if (myDropdown.classList.contains("show")) {
+                    myDropdown.classList.remove("show");
+                }
+            }
+        };
     </script>
-
 {% endblock %} 
 
 {% block content %}
@@ -58,7 +56,7 @@
   </main>
 
   <!-- Our Mission Row -->
-  <main class="bd-masthead" role="main">
+  <main class="bd-masthead" role="main" style="background-color: #242a37;">
       <div class="container">
 
           <!-- Description -->
@@ -114,7 +112,7 @@
   </main>
 
   <!-- Services Row -->
-  <main class="bd-masthead" role="main">
+  <main class="bd-masthead" role="main" style="background-color: #242a37;">
       <div class="container">
 
           <div class="row">

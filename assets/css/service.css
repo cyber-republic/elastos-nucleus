@@ -5,12 +5,10 @@
 
 .search-form {
   width: 300px;
-  height: 40px;
   border-radius: 2px;
 }
 
 .search-form input {
-  height: 30px;
   font-size: 13px;
   font-weight: normal;
   font-stretch: normal;
@@ -42,7 +40,7 @@
 .service-divider {
   height: 1px;
   opacity: 0.8;
-  background-color: #181b22;
+  background-color: white;
   margin: 0px 30px 30px 30px;
 }
 
@@ -91,7 +89,7 @@ li.active a, li.active a:hover {
 .tab-content {
     margin: 0px 30px;
     border-radius: 4px;
-    background-color: #a6a6a6;
+    background-color: rgba(107, 121, 152, 0.7);
 }
 
 .tab {
@@ -110,4 +108,11 @@ li.active a, li.active a:hover {
 
 pre.prettyprint {
     border: none !important;
+}
+
+.network-button {
+  width: 287px;
+  height: 44px;
+  border-radius: 4px;
+  background-color: #5ac8fa;
 }
