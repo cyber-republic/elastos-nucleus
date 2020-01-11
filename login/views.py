@@ -108,7 +108,7 @@ def did_callback(request):
 
 def register(request):
     if 'redirect_success' not in request.session.keys():
-        redirect(reverse('landing'))
+        return redirect(reverse('landing'))
     if request.method == 'POST':
         form = DIDUserCreationForm(request.POST,
                                    initial={'name': request.session['name'], 'email': request.session['email'],
