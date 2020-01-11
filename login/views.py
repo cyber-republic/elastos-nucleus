@@ -40,8 +40,7 @@ def check_ela_auth(request):
     state = request.session['elaState']
     try:
         recently_created_time = timezone.now() - timedelta(minutes=1)
-        did_request_query_result = DIDRequest.objects.get(
-            state=state, created_at__gte=recently_created_time)
+        did_request_query_result = DIDRequest.objects.get(state=state, created_at__gte=recently_created_time)
         data = json.loads(did_request_query_result.data)
         if not data["auth"]:
             return JsonResponse({'authenticated': False}, status=403)
@@ -63,11 +62,9 @@ def check_ela_auth(request):
                                  "The email '%s' needs to be verified. Please check your email for confirmation link" % user.email)
             else:
                 redirect_url = "/login/feed"
-                login(request, user,
-                      backend='django.contrib.auth.backends.ModelBackend')
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 request.session['logged_in'] = True
-                populate_session_vars_from_database(
-                    request, request.session['did'])
+                populate_session_vars_from_database(request, request.session['did'])
                 messages.success(request, "Logged in successfully!")
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
@@ -85,8 +82,7 @@ def did_callback(request):
         client_public_key = data['PublicKey']
 
         r, s = int(sig[:64], 16), int(sig[64:], 16)
-        public_key = SEC1Encoder.decode_public_key(
-            unhexlify(client_public_key), curve.P256)
+        public_key = SEC1Encoder.decode_public_key(unhexlify(client_public_key), curve.P256)
         valid = ecdsa.verify((r, s), response['Data'], public_key)
         if not valid:
             return JsonResponse({'message': 'Unauthorized'}, status=401)
@@ -97,8 +93,7 @@ def did_callback(request):
             if not did_request_query_result:
                 return JsonResponse({'message': 'Unauthorized'}, status=401)
             data["auth"] = True
-            DIDRequest.objects.filter(
-                state=data["RandomNumber"]).update(data=json.dumps(data))
+            DIDRequest.objects.filter(state=data["RandomNumber"]).update(data=json.dumps(data))
         except Exception as e:
             logging.debug(f" Method: did_callback Error: {e}")
             JsonResponse({'error': str(e)}, status=404)
@@ -121,8 +116,7 @@ def register(request):
             send_email(request, to_email, user)
             request.session['name'] = user.name
             request.session['email'] = user.email
-            messages.success(
-                request, "Please check your email to complete your registration")
+            messages.success(request, "Please check your email to complete your registration")
             return redirect(reverse('landing'))
     else:
         form = DIDUserCreationForm(initial={'name': request.session['name'], 'email': request.session['email'],
@@ -148,8 +142,7 @@ def edit_profile(request):
                 user.save()
                 to_email = form.cleaned_data.get('email')
                 send_email(request, to_email, user)
-                messages.success(
-                    request, "Please check your email to finish modifying your profile info")
+                messages.success(request, "Please check your email to finish modifying your profile info")
             else:
                 user.save()
             return redirect(reverse('login:feed'))
@@ -223,8 +216,7 @@ def sign_in(request):
     # Save token to the database didauth_requests
     token = {'state': random, 'data': {'auth': False}}
 
-    DIDRequest.objects.create(
-        state=token['state'], data=json.dumps(token['data']))
+    DIDRequest.objects.create(state=token['state'], data=json.dumps(token['data']))
     # Purge old requests for housekeeping. If the time denoted by 'created_by'
     # is more than 2 minutes old, delete the row
     stale_time = timezone.now() - timedelta(minutes=2)
