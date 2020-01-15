@@ -177,7 +177,6 @@ def verify_and_show(request):
     with open(os.path.join(module_dir, 'sample_code/go/verify_and_show.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     if request.is_ajax():
-        print("comes to function")
         filename = request.POST.get('file_name')
         try:
             userFile = SavedFileInformation.objects.filter(did=did, file_name=filename)
