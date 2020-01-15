@@ -3,7 +3,11 @@
 
 {% block title %}
 <title>Upload and Sign - Elastos Nucleus</title>
-{% endblock title %} 
+{% endblock title %}
+
+{% block scripts_services %}
+    <script src="{% static '/javascript/UploadFile.js' %}" type="text/javascript"></script>
+{% endblock %}
 
 {% block related_services %}
   <li>
@@ -32,6 +36,7 @@
     </a>
   </li>
 {% endblock related_services %}
+
 
 {% block documentation %}
   <li>
