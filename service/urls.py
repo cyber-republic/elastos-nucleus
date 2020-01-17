@@ -17,5 +17,4 @@ urlpatterns = [
     url(r'watch_eth_contract', views.watch_eth_contract, name="watch_eth_contract"),
     url(r'run_eth_contract', views.run_eth_contract, name="run_eth_contract"),
     url(r'suggest_service', views.suggest_service, name="suggest_service")
-
 ]

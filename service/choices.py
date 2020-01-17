@@ -9,8 +9,8 @@ NETWORK_GMU = (
 
 CATEGORY = (
     ('common', "Common"),
-    ('Hive' , 'Elastos Hive'),
+    ('hive', 'Elastos Hive'),
     ('eth_sidechain', "ETH Sidechain"),
     ('wallet', "Wallet"),
-    ('playground' , "Playground"),
+    ('playground', "Playground"),
 )

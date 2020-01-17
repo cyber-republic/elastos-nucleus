@@ -247,8 +247,3 @@ def sign_out(request):
     else:
         messages.success(request, "You have been logged out!")
     return redirect(reverse('landing'))
-
-
-
-
-
