@@ -639,3 +639,4 @@ def suggest_service(request):
         recent_services = get_recent_services(did)
         return render(request, "service/suggest_service.html", {'recent_services': recent_services})
 
+
