@@ -2,479 +2,338 @@
 {% load static %}
 
 {% block title %}
-  <title>Home - Elastos Nucleus</title>
+  <title>Feed - Elastos Nucleus</title>
 {% endblock title %}
 
+{% block scripts %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}"/>
+{% endblock %}
+
 {% block content %}
-<!-- Carousel -->
-  <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
-    <ol class="carousel-indicators">
-      <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-      <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-      <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
-    </ol>
-    <div class="carousel-inner">
-      <div class="carousel-item active" style="background-color: #0958a7;">
-          <img class="d-block w-100" src="..." alt="First slide">
-          <div class="carousel-caption d-none d-md-block text-white">
-            <h3>Account Management</h3>
-            <p>View any deployed apps, API keys, and more on your account page</p>
-          </div>
-      </div>
-      <div class="carousel-item" style="background-color: #0958a7;">
-          <img class="d-block w-100" src="..." alt="Second slide">
-          <div class="carousel-caption d-none d-md-block text-white">
-            <h3>ELA Requesting</h3>
-            <p>Use our Request ELA service to play around with fake ELA and all its functionalities</p>
-          </div>
-      </div>
-      <div class="carousel-item" style="background-color: #0958a7;">
-          <img class="d-block w-100" src="..." alt="Third slide">
-          <div class="carousel-caption d-none d-md-block text-white">
-            <h3>View Tutorials</h3>
-            <p>New to the console? Watch some tutorials to get started.</p>
-          </div>
-      </div>
+    <!-- Carousel -->
+    <div id="carouselExampleIndicators" class="carousel slide feed-carousel" data-ride="carousel" style="background-color: #14161c">
+        <ol class="carousel-indicators">
+            <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+            <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+            <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+        </ol>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="carousel-caption d-none d-md-block text-white">
+                    <h2>View Tutorials</h2>
+                    <p>New to the console? Watch some tutorials to get started.</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="carousel-caption d-none d-md-block text-white">
+                    <h2>Account Management</h2>
+                    <p>View any deployed dApps on elastOS, API keys, and more on your account page</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="carousel-caption d-none d-md-block text-white">
+                    <h2>Request some test ELA</h2>
+                    <p>Use our Request ELA service to request test ELA to use for various purposes</p>
+                </div>
+            </div>
+        </div>
+        <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
     </div>
-    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="sr-only">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="sr-only">Next</span>
-    </a>
-  </div>
 
-  <!-- Services Row -->
-  <main class="bd-masthead" id="content2" role="main"  style="background-color: #ffffff;">
-      <div class="row">
-          <div class="container col-8" style="box-shadow: 0 2px 48px 0 rgba(0, 0, 0, 0.1);">
 
-            <!-- Description -->
-            <div class="row justify-content-left m-45px-b md-m-20px-b sm-m-15px-b border" style="background-color: #eff4f7; padding-top: 7.5px; padding-bottom: 7.5px;">
-              <div class="col-12 col-md-10 col-lg-7">
-                <div class="section-title text-left">
-                  <h2 class="font-alt">Console Services</h2>
-                  <p>Check all of our services and see your most recent visits.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Services -->
-            <div class="row" style="margin-top: 15px;">
-              <div class="col-3">
-                <div class="feature-box-01" style="background: #eff4f7;">
-                  <svg><use xlink:href="#sketching"></use></svg>
-                  <div class="feature-content">
-                    <h5 class="font-alt">
-                      <a href="/service/generate_key" style="color: #212529;">
-                        Generate Key
-                      </a>
-                    </h5>
-                  </div>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="feature-box-01" style="background: #eff4f7;">
-                  <svg><use xlink:href="#command_line"></use></svg>
-                  <div class="feature-content">
-                    <h5 class="font-alt">
-                      <a href="/service/upload_and_sign" style="color: #212529;">
-                        Upload And Sign
-                      </a>
-                    </h5>
-                  </div>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="feature-box-01" style="background: #eff4f7;">
-                  <svg><use xlink:href="#biz_discussion"></use></svg>
-                  <div class="feature-content">
-                    <h5 class="font-alt">
-                      <a href="/service/verify_and_show" style="color: #212529;">
-                        Verify And Show
-                      </a>
-                    </h5>
-                  </div>
-                </div>
-              </div> <!-- col -->
-              <div class="col-3">
-                <div class="feature-box-01" style="background: #eff4f7;">
-                  <svg><use xlink:href="#biz_discussion"></use></svg>
-                  <div class="feature-content">
-                    <h5 class="font-alt">
-                      <a href="/service/request_ela" style="color: #212529;">
-                        Request ELA
-                      </a>
-                    </h5>
-                  </div>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="feature-box-01" style="background: #eff4f7;">
-                  <svg><use xlink:href="#biz_discussion"></use></svg>
-                  <div class="feature-content">
-                    <h5 class="font-alt">
-                      <a href="/service/create_wallet" style="color: #212529;">
-                        Create Wallet
-                      </a>
-                    </h5>
-                  </div>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="feature-box-01" style="background: #eff4f7;">
-                  <svg><use xlink:href="#biz_discussion"></use></svg>
-                  <div class="feature-content">
-                    <h5 class="font-alt">
-                      <a href="/service/run_eth_contract" style="color: #212529;">
-                        Run Contract
-                      </a>
-                    </h5>
-                  </div>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="feature-box-01" style="background: #eff4f7;">
-                  <svg><use xlink:href="#biz_discussion"></use></svg>
-                  <div class="feature-content">
-                    <h5 class="font-alt">
-                      <a href="/service/deploy_eth_contract" style="color: #212529;">
-                        Deploy Contract
-                      </a>
-                    </h5>
-                  </div>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="feature-box-01" style="background: #eff4f7;">
-                  <svg><use xlink:href="#biz_discussion"></use></svg>
-                  <div class="feature-content">
-                    <h5 class="font-alt">
-                      <a href="/service/deploy_elastos_dapp" style="color: #212529;">
-                        Deploy DApp
-                      </a>
-                    </h5>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-      
-
-        <div class="container col-3" style="box-shadow: 0 2px 48px 0 rgba(0, 0, 0, 0.1);">
-
-          <!-- Description -->
-          <div class="row justify-content-left m-45px-b md-m-20px-b sm-m-15px-b border" style="background-color: #eff4f7; padding-top: 7.5px; padding-bottom: 7.5px;">
-            <div class="col-3 col-md-10 col-lg-7">
-              <div class="section-title text-left">
-                <h2 class="font-alt">Most Viewed</h2>
-              </div>
-            </div>
-          </div>
-
-          <!-- Services -->
-        <div>
-            {% if most_visited_pages.exists %}
-                {% for item in most_visited_pages %}
-                    <div class="row justify-content-center" style="margin-top: 15px;">
-                          <div class="card text-white justify-content-center bg-secondary mb-3 w-50 ">
-                                  <a href="{% url item.view %}" style="color: inherit">
-                                    <div class="card-body justify-content-center">
-                                        {{ item.name }}
-                                    </div>
-                                  </a>
-
-                          </div>
+    <main class="bd-masthead" role="main" style="background-color: #181b22;">
+        <div class="row">
+            <!-- Services Row -->
+            <div class="col-9 console-services">
+                <p style="float: left; margin: 15px;">
+                    <img src="{% static 'images/common/run-contract.svg' %}"/>
+                </p>
+                <p class="console-services-title" style="margin: 20px;">
+                    CONSOLE SERVICES
+                </p>
+                <div class="divider"></div>
+                <p class="console-services-title" style="font-size: 18px;margin: 0px 20px 20px 20px;">Services Available</p>
+                <div class="row">
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/key.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name">
+                            Generate API Key<br><br>
+                            Category: <span class="console-services-category">Common</span><br><br>
+                            <button class="code-button available" disabled>Python</button>&emsp;
+                            <button class="code-button" disabled>Golang</button>&emsp;
+                            <button class="code-button" disabled>elastOS</button><br><br>
+                            <div class="divider"></div>
+                        </p>
                     </div>
-                {% endfor %}
-            {% endif %}
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/get-aki.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name">
+                            Get API Key<br><br>
+                            Category: <span class="console-services-category">Common</span><br><br>
+                            <button class="code-button available disabled">Python</button>&emsp;
+                            <button class="code-button" disabled>Golang</button>&emsp;
+                            <button class="code-button" disabled>elastOS</button><br><br>
+                            <div class="divider"></div>
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/upload.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name">
+                            Upload and Sign<br><br>
+                            Category: <span class="console-services-category">Hive,DID Sidechain</span><br><br>
+                            <button class="code-button available" disabled>Python</button>&emsp;
+                            <button class="code-button" disabled>Golang</button>&emsp;
+                            <button class="code-button" disabled>elastOS</button><br><br>
+                            <div class="divider"></div>
+                        </p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/show.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name">
+                            Verify And Show<br><br>
+                            Category: <span class="console-services-category">Hive,DID Sidechain</span><br><br>
+                            <button class="code-button available" disabled>Python</button>&emsp;
+                            <button class="code-button" disabled>Golang</button>&emsp;
+                            <button class="code-button" disabled>elastOS</button><br><br>
+                            <div class="divider"></div>
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/contract.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name">
+                            Deploy ETH Contract<br><br>
+                            Category:<span class="console-services-category">ETH Sidechain</span><br><br>
+                            <button class="code-button available" disabled>Python</button>&emsp;
+                            <button class="code-button" disabled>Golang</button>&emsp;
+                            <button class="code-button" disabled>elastOS</button><br><br>
+                            <div class="divider"></div>
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/eth-contract.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name">
+                            Watch ETH Contract<br><br>
+                            Category:<span class="console-services-category">ETH Sidechain</span><br><br>
+                            <button class="code-button available disabled">Python</button>&emsp;
+                            <button class="code-button" disabled>Golang</button>&emsp;
+                            <button class="code-button" disabled>elastOS</button><br><br>
+                            <div class="divider"></div>
+                        </p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/wallet.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name">
+                            Create Wallet<br><br>
+                            Category:
+                            <span class="console-services-category">
+                                Wallet,Mainchain,DID Sidechain,Token Sidechain,ETH Sidechain
+                            </span><br><br>
+                            <button class="code-button available" disabled>Python</button>&emsp;
+                            <button class="code-button" disabled>Golang</button>&emsp;
+                            <button class="code-button" disabled>elastOS</button><br><br>
+                            <div class="divider"></div>
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/show.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name">
+                            View Wallet<br><br>
+                            Category:
+                            <span class="console-services-category">
+                                Wallet,Mainchain,DID Sidechain,Token Sidechain,ETH Sidechain
+                            </span><br><br>
+                            <button class="code-button available disabled">Python</button>&emsp;
+                            <button class="code-button" disabled>Golang</button>&emsp;
+                            <button class="code-button" disabled>elastOS</button><br><br>
+                            <div class="divider"></div>
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/ela-coin.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name">
+                            Request Test ELA<br><br>
+                            Category:
+                            <span class="console-services-category">
+                                Wallet,Mainchain,DID Sidechain,Token Sidechain,ETH Sidechain
+                            </span><br><br>
+                            <button class="code-button available" disabled>Python</button>&emsp;
+                            <button class="code-button" disabled>Golang</button>&emsp;
+                            <button class="code-button" disabled>elastOS</button><br><br>
+                            <div class="divider"></div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Most Viewed Row -->
+            <div class="col-2 console-services">
+                <p style="float: left; margin: 15px;">
+                    <img src="{% static 'images/common/show.svg' %}"/>
+                </p>
+                <p class="console-services-title" style="margin: 20px;">
+                    MOST VIEWED PAGES
+                </p>
+                <div class="divider"></div>
+                <p style="margin: 0px 20px 20px 20px;">
+                    {% if most_visited_pages.exists %}
+                    {% for item in most_visited_pages %}
+                        <a class="sidebar-content" href="{% url item.view %}">{{ item.name }}</a><br>
+                    {% endfor %}
+                {% endif %}
+                </p>
+            </div>
         </div>
 
-  
-</main>
-
-<!-- Services Row -->
-<main class="bd-masthead" id="content2" role="main"  style="background-color: #ffffff;">
-    <div class="row">
-        <div class="container col-3" style="box-shadow: 0 2px 48px 0 rgba(0, 0, 0, 0.1);">
-
-            <!-- Description -->
-            <div class="row justify-content-left m-45px-b md-m-20px-b sm-m-15px-b border" style="background-color: #eff4f7; padding-top: 7.5px; padding-bottom: 7.5px;">
-              <div class="col-3 col-md-10 col-lg-7">
-                <div class="section-title text-left">
-                  <h2 class="font-alt">User Activity</h2>
+        <div class="row">
+            <!-- Deployed Apps Row -->
+            <div class="col-9 console-services">
+                <p style="float: left; margin: 15px;">
+                    <img src="{% static 'images/common/contract.svg' %}"/>
+                </p>
+                <p class="console-services-title" style="margin: 20px;">
+                    Deployed dApps on elastOS
+                </p>
+                <div class="divider"></div>
+                <p class="console-services-title" style="font-size: 18px;margin: 0px 20px 20px 20px;">
+                    View and manage all dApps deployed on elastOS
+                </p>
+                <div class="row">
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/icon.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name" style="margin-top: 20px;">
+                            COMING SOON<br><br>
+                            Category: <span class="console-services-category">APP #1</span>
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/icon.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name" style="margin-top: 20px;">
+                            COMING SOON<br><br>
+                            Category: <span class="console-services-category">APP #2</span>
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/icon.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name" style="margin-top: 20px;">
+                            COMING SOON<br><br>
+                            Category: <span class="console-services-category">APP #3</span>
+                        </p>
+                    </div>
                 </div>
-              </div>
             </div>
-    
-            <!-- Services -->
-            <div class="row" style="margin-top: 15px;">
-              
+            <!-- User Activity Row -->
+            <div class="col-2 console-services">
+                <p style="float: left; margin: 15px;">
+                    <img src="{% static 'images/common/show.svg' %}"/>
+                </p>
+                <p class="console-services-title" style="margin: 20px;">
+                    YOUR ACTIVITY
+                </p>
+                <div class="divider"></div>
+                <p class="sidebar-content" style="margin: 0px 20px 20px 20px;">COMING SOON</p>
             </div>
         </div>
 
-        <div class="container col-8" style="box-shadow: 0 2px 48px 0 rgba(0, 0, 0, 0.1);">
-
-          <!-- Description -->
-          <div class="row justify-content-left m-45px-b md-m-20px-b sm-m-15px-b border" style="background-color: #eff4f7; padding-top: 7.5px; padding-bottom: 7.5px;">
-            <div class="col-12 col-md-10 col-lg-7">
-              <div class="section-title text-left">
-                <h2 class="font-alt">Deployed DApps</h2>
-                <p>Manage and configure all DApps deployed onto ElastOS.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Services -->
-          <div class="row" style="margin-top: 15px;">
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#sketching"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/generate_key" style="color: #212529;">
-                      Generate Key
+        <div class="row">
+            <!-- Support Row -->
+            <div class="col-2 console-services">
+                <p style="float: left; margin: 15px;">
+                    <img src="{% static 'images/feed/bx-help-circle.svg' %}"/>
+                </p>
+                <p class="console-services-title" style="margin: 20px;">
+                    WE NEED YOU!
+                </p>
+                <div class="divider"></div>
+                <p style="float: left; margin: 0px 15px 0px 15px;">
+                    <img src="{% static 'images/feed/bug.svg' %}"/>
+                </p>
+                <p>
+                    <a class="sidebar-content" href="https://github.com/cyber-republic/elastos-nucleus/issues">
+                        Report bugs or tell us what to improve
                     </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#command_line"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/upload_and_sign" style="color: #212529;">
-                      Upload And Sign
+                </p>
+                <p style="float: left; margin: 0px 15px 0px 15px;">
+                    <img src="{% static 'images/feed/github.svg' %}"/>
+                </p>
+                <p>
+                    <a class="sidebar-content" href="#">
+                        Suggest a new service to be added to the Console
                     </a>
-                  </h5>
-                </div>
-              </div>
+                </p>
             </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/verify_and_show" style="color: #212529;">
-                      Verify And Show
-                    </a>
-                  </h5>
+            <!-- Tutorials Row -->
+            <div class="col-9  console-services">
+                <p style="float: left; margin: 15px;">
+                    <img src="{% static 'images/feed/bx-bookmarks.svg' %}"/>
+                </p>
+                <p class="console-services-title" style="margin: 20px;">
+                    UNDERSTAND THE NUCLEUS CONSOLE
+                </p>
+                <div class="divider"></div>
+                <div class="row">
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/icon.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name" style="margin-top: 20px;">
+                            Tutorial #1<br><br>
+                            <span class="console-services-category">Coming soon</span>
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/icon.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name" style="margin-top: 20px;">
+                            Tutorial #2<br><br>
+                            <span class="console-services-category">COMING SOON</span>
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p class="console-services-image">
+                            <img src="{% static 'images/common/icon.svg' %}" width="250%"/>
+                        </p>
+                        <p class="console-services-name" style="margin-top: 20px;">
+                            Tutorial #3<br><br>
+                            <span class="console-services-category">COMING SOON</span>
+                        </p>
+                    </div>
                 </div>
-              </div>
-            </div> <!-- col -->
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/request_ela" style="color: #212529;">
-                      Request ELA
-                    </a>
-                  </h5>
-                </div>
-              </div>
             </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/create_wallet" style="color: #212529;">
-                      Create Wallet
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/run_eth_contract" style="color: #212529;">
-                      Run Contract
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/deploy_eth_contract" style="color: #212529;">
-                      Deploy Contract
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/deploy_elastos_dapp" style="color: #212529;">
-                      Deploy DApp
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-    </div>
-
-</main>
-
-<!-- Services Row -->
-<main class="bd-masthead" id="content2" role="main"  style="background-color: #ffffff;">
-    <div class="row">
-        <div class="container col-8" style="box-shadow: 0 2px 48px 0 rgba(0, 0, 0, 0.1);">
-
-          <!-- Description -->
-          <div class="row justify-content-left m-45px-b md-m-20px-b sm-m-15px-b border" style="background-color: #eff4f7; padding-top: 7.5px; padding-bottom: 7.5px;">
-            <div class="col-12 col-md-10 col-lg-7">
-              <div class="section-title text-left">
-                <h2 class="font-alt">Service Tutorials</h2>
-                <p>New to the console? Explore the many tutorials that will help you get started.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Services -->
-          <div class="row" style="margin-top: 15px;">
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#sketching"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/generate_key" style="color: #212529;">
-                      Generate Key
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#command_line"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/upload_and_sign" style="color: #212529;">
-                      Upload And Sign
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/verify_and_show" style="color: #212529;">
-                      Verify And Show
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div> <!-- col -->
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/request_ela" style="color: #212529;">
-                      Request ELA
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/create_wallet" style="color: #212529;">
-                      Create Wallet
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/run_eth_contract" style="color: #212529;">
-                      Run Contract
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/deploy_eth_contract" style="color: #212529;">
-                      Deploy Contract
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="feature-box-01" style="background: #eff4f7;">
-                <svg><use xlink:href="#biz_discussion"></use></svg>
-                <div class="feature-content">
-                  <h5 class="font-alt">
-                    <a href="/service/deploy_elastos_dapp" style="color: #212529;">
-                      Deploy DApp
-                    </a>
-                  </h5>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-    
-
-      <div class="container col-3" style="box-shadow: 0 2px 48px 0 rgba(0, 0, 0, 0.1);">
-
-        <!-- Description -->
-        <div class="row justify-content-left m-45px-b md-m-20px-b sm-m-15px-b border" style="background-color: #eff4f7; padding-top: 7.5px; padding-bottom: 7.5px;">
-          <div class="col-3 col-md-10 col-lg-7">
-            <div class="section-title text-left">
-              <h2 class="font-alt">Feedback</h2>
-            </div>
-          </div>
-        </div>
-
-        <!-- Services -->
-        <div class="row" style="margin-top: 15px;">
-            <div class="col-12">
-                <div class="feature-box-01" style="background: #eff4f7;">
-                  <svg><use xlink:href="#biz_discussion"></use></svg>
-                  <div class="feature-content">
-                    <h5 class="font-alt">
-                      <a href="/service/suggest_service" style="color: #212529;">
-                        Suggest Service
-                      </a>
-                    </h5>
-                  </div>
-                </div>
-              </div>
-        </div>
-      </div>
-    </div>
-</main>
+    </main>
 {% endblock %}

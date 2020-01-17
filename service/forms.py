@@ -1,8 +1,11 @@
 from django import forms
 from django.forms import HiddenInput
 
-from .models import UploadFile
+from .models import UploadFile , SavedFileInformation
 from .choices import *
+
+
+GMUNET_BUTTON = 'width: 150px; height: 44px; border-radius: 4px; background-color: #5ac8fa;'
 
 
 class GenerateAPIKeyForm(forms.Form):
@@ -17,21 +20,25 @@ class GenerateAPIKeyForm(forms.Form):
 class UploadAndSignForm(forms.ModelForm):
     network = forms.ChoiceField(
         choices=NETWORK_GMU, label="", initial='', widget=forms.Select(), required=True)
-    file_content = forms.CharField(widget=forms.TextInput, required=False)
+    file_content = forms.CharField(widget=forms.Textarea, required=False)
     private_key = forms.CharField(max_length=300, widget=forms.Textarea)
     api_key = forms.CharField(max_length=64, widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
         super(UploadAndSignForm, self).__init__(*args, **kwargs)
+        self.label_suffix = ""
         self.fields['did'].required = False
         self.fields['did'].widget = HiddenInput()
 
         self.fields['file_content'].widget.attrs['rows'] = 10
         self.fields['file_content'].widget.attrs['cols'] = 100
         self.fields['private_key'].widget.attrs['rows'] = 1
-        self.fields['private_key'].widget.attrs['cols'] = 100
+        self.fields['private_key'].widget.attrs['cols'] = 85
         self.fields['api_key'].widget.attrs['rows'] = 1
-        self.fields['api_key'].widget.attrs['cols'] = 100
+        self.fields['api_key'].widget.attrs['cols'] = 80
+
+        self.fields['network'].widget.attrs['style'] = GMUNET_BUTTON
+        self.fields['uploaded_file'].label = ""
 
     class Meta:
         model = UploadFile
@@ -41,38 +48,53 @@ class UploadAndSignForm(forms.ModelForm):
 class VerifyAndShowForm(forms.Form):
     network = forms.ChoiceField(
         choices=NETWORK_GMU, label="", initial='', widget=forms.Select(), required=True)
+    select_files = forms.ModelChoiceField(queryset=None)
     message_hash = forms.CharField(
-        max_length=300, widget=forms.Textarea, help_text="Enter the Message Hash from DID")
+        max_length=300, widget=forms.Textarea)
     public_key = forms.CharField(
-        max_length=300, widget=forms.Textarea, help_text="Enter the Public Key from DID")
+        max_length=300, widget=forms.Textarea)
     signature = forms.CharField(
-        max_length=300, widget=forms.Textarea, help_text="Enter the Signature from DID")
+        max_length=300, widget=forms.Textarea)
     file_hash = forms.CharField(
-        max_length=300, widget=forms.Textarea, help_text="Enter your File Hash output from HIVE")
+        max_length=300, widget=forms.Textarea)
     private_key = forms.CharField(
-        max_length=300, widget=forms.Textarea, help_text="Enter your Private Key")
+        max_length=300, widget=forms.Textarea)
     api_key = forms.CharField(
-        max_length=64, widget=forms.Textarea, help_text="Enter your API Key")
+        max_length=64, widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
+        did = kwargs.pop('did', None)
         super(VerifyAndShowForm, self).__init__(*args, **kwargs)
+        self.label_suffix = ""
+
+        self.fields['message_hash'].label = "Message Hash(Enter the Message Hash from DID)"
         self.fields['message_hash'].widget.attrs['rows'] = 1
-        self.fields['message_hash'].widget.attrs['cols'] = 80
+        self.fields['message_hash'].widget.attrs['cols'] = 115
 
+        self.fields['public_key'].label = "Enter the Public Key from DID"
         self.fields['public_key'].widget.attrs['rows'] = 1
-        self.fields['public_key'].widget.attrs['cols'] = 80
+        self.fields['public_key'].widget.attrs['cols'] = 85
 
+        self.fields['signature'].label = "Enter the Signature from DID"
         self.fields['signature'].widget.attrs['rows'] = 1
-        self.fields['signature'].widget.attrs['cols'] = 80
+        self.fields['signature'].widget.attrs['cols'] = 160
 
+        self.fields['file_hash'].label = "Enter your File Hash output from HIVE"
         self.fields['file_hash'].widget.attrs['rows'] = 1
-        self.fields['file_hash'].widget.attrs['cols'] = 80
+        self.fields['file_hash'].widget.attrs['cols'] = 58
 
+        self.fields['private_key'].label = "Enter your Private Key"
         self.fields['private_key'].widget.attrs['rows'] = 1
-        self.fields['private_key'].widget.attrs['cols'] = 80
+        self.fields['private_key'].widget.attrs['cols'] = 85
 
+        self.fields['api_key'].label = "Enter your API Key"
         self.fields['api_key'].widget.attrs['rows'] = 1
         self.fields['api_key'].widget.attrs['cols'] = 80
+
+        self.fields['select_files'].label = "Select a previously uploaded file"
+        self.fields['select_files'] = forms.ModelChoiceField(queryset=SavedFileInformation.objects.filter(did=did), required=False)
+
+        self.fields['network'].widget.attrs['style'] = GMUNET_BUTTON
 
 
 class CreateWalletForm(forms.Form):
@@ -83,7 +105,9 @@ class CreateWalletForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(CreateWalletForm, self).__init__(*args, **kwargs)
         self.fields['api_key'].widget.attrs['rows'] = 1
-        self.fields['api_key'].widget.attrs['cols'] = 100
+        self.fields['api_key'].widget.attrs['cols'] = 80
+
+        self.fields['network'].widget.attrs['style'] = GMUNET_BUTTON
 
 
 class ViewWalletForm(forms.Form):
@@ -95,15 +119,18 @@ class ViewWalletForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(ViewWalletForm, self).__init__(*args, **kwargs)
+        self.label_suffix = ""
         self.fields['chain'].required = False
 
         self.fields['api_key'].widget.attrs['rows'] = 1
-        self.fields['api_key'].widget.attrs['cols'] = 100
+        self.fields['api_key'].widget.attrs['cols'] = 80
 
         self.fields['address'].widget.attrs['rows'] = 1
-        self.fields['address'].widget.attrs['cols'] = 100
+        self.fields['address'].widget.attrs['cols'] = 55
 
         self.fields['chain'].widget = HiddenInput()
+
+        self.fields['network'].widget.attrs['style'] = GMUNET_BUTTON
 
 
 class RequestELAForm(forms.Form):
@@ -115,15 +142,18 @@ class RequestELAForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(RequestELAForm, self).__init__(*args, **kwargs)
+        self.label_suffix = ""
         self.fields['chain'].required = False
 
         self.fields['api_key'].widget.attrs['rows'] = 1
-        self.fields['api_key'].widget.attrs['cols'] = 100
+        self.fields['api_key'].widget.attrs['cols'] = 80
 
         self.fields['address'].widget.attrs['rows'] = 1
-        self.fields['address'].widget.attrs['cols'] = 100
+        self.fields['address'].widget.attrs['cols'] = 55
 
         self.fields['chain'].widget = HiddenInput()
+
+        self.fields['network'].widget.attrs['style'] = GMUNET_BUTTON
 
 
 class DeployETHContractForm(forms.ModelForm):
@@ -132,23 +162,30 @@ class DeployETHContractForm(forms.ModelForm):
     eth_account_address = forms.CharField(
         max_length=300, widget=forms.Textarea)
     eth_private_key = forms.CharField(max_length=300, widget=forms.Textarea)
-    eth_gas = forms.IntegerField()
+    eth_gas = forms.IntegerField(widget=forms.Textarea)
     api_key = forms.CharField(max_length=64, widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
         super(DeployETHContractForm, self).__init__(*args, **kwargs)
+        self.label_suffix = ""
         self.fields['did'].required = False
 
         self.fields['api_key'].widget.attrs['rows'] = 1
-        self.fields['api_key'].widget.attrs['cols'] = 100
+        self.fields['api_key'].widget.attrs['cols'] = 80
 
         self.fields['eth_account_address'].widget.attrs['rows'] = 1
-        self.fields['eth_account_address'].widget.attrs['cols'] = 100
+        self.fields['eth_account_address'].widget.attrs['cols'] = 55
 
         self.fields['eth_private_key'].widget.attrs['rows'] = 1
-        self.fields['eth_private_key'].widget.attrs['cols'] = 100
+        self.fields['eth_private_key'].widget.attrs['cols'] = 85
+
+        self.fields['eth_gas'].widget.attrs['rows'] = 1
+        self.fields['eth_gas'].widget.attrs['cols'] = 16
 
         self.fields['did'].widget = HiddenInput()
+
+        self.fields['network'].widget.attrs['style'] = GMUNET_BUTTON
+        self.fields['uploaded_file'].label = ""
 
     class Meta:
         model = UploadFile
@@ -165,15 +202,19 @@ class WatchETHContractForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(WatchETHContractForm, self).__init__(*args, **kwargs)
+        self.label_suffix = ""
 
         self.fields['api_key'].widget.attrs['rows'] = 1
-        self.fields['api_key'].widget.attrs['cols'] = 100
+        self.fields['api_key'].widget.attrs['cols'] = 80
 
         self.fields['contract_address'].widget.attrs['rows'] = 1
-        self.fields['contract_address'].widget.attrs['cols'] = 100
+        self.fields['contract_address'].widget.attrs['cols'] = 55
 
         self.fields['contract_name'].widget.attrs['rows'] = 1
-        self.fields['contract_name'].widget.attrs['cols'] = 100
+        self.fields['contract_name'].widget.attrs['cols'] = 24
 
         self.fields['contract_code_hash'].widget.attrs['rows'] = 1
-        self.fields['contract_code_hash'].widget.attrs['cols'] = 100
+        self.fields['contract_code_hash'].widget.attrs['cols'] = 55
+
+        self.fields['network'].widget.attrs['style'] = GMUNET_BUTTON
+
