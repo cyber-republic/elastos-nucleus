@@ -260,6 +260,7 @@ def sign_out(request):
 
 @login_required
 def get_user_data(request):
+    exempt_fields = ['password']
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="user_data.csv"'
     writer = csv.writer(response)
@@ -277,7 +278,11 @@ def get_user_data(request):
                 for obj in user_objects:
                     list = []
                     for field in model._meta.get_fields():
-                        list.append(str(field.value_from_object(obj)))
+                        val = str(field.value_from_object(obj))
+                        if val not in exempt_fields:
+                            list.append(val)
+                        else:
+                            list.append('N/A')
                     writer.writerow(list)
                 writer.writerow([])
             except Exception as e:

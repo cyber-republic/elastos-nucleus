@@ -24,6 +24,9 @@ class DIDUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+    @staticmethod
+    def user_name():
+        return 'User Identification Info'
 
 
 class DIDRequest(models.Model):
