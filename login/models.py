@@ -25,8 +25,10 @@ class DIDUser(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+
 class DIDRequest(models.Model):
     state = models.CharField(max_length=20)
     data = JSONField()
     created_at = models.DateTimeField(default=timezone.now)
     last_updated = models.DateTimeField(auto_now=True)
+
