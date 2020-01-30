@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include
+from django.urls import path
 from django.conf.urls import url
 from qr_code import urls as qr_code_urls
 from . import views
@@ -25,6 +26,8 @@ urlpatterns = [
     url('admin/', admin.site.urls),
     url(r'^at/', include('admin_tools.urls')),
     url(r'^$', views.landing, name="landing"),
+    path('did_callback', views.did_callback, name="did_callback"),
+    path('check_ela_auth', views.check_ela_auth, name="check_ela_auth"),
     url(r'^service/', include('service.urls'), name='service'),
     url(r'^browser/', include('browser.urls'), name='browser'),
     url(r'^login/', include('login.urls'), name='login'),

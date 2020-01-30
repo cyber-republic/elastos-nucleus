@@ -1,108 +1,26 @@
-import json
 import gc
-import logging
 
 import csv
 from django.apps import apps
 from django.conf import settings
 
-from datetime import timedelta
-
-from django.contrib.auth import login
-from django.utils import timezone
-from fastecdsa.encoding.sec1 import SEC1Encoder
-from fastecdsa import ecdsa, curve
-from binascii import unhexlify
 from decouple import config
 
 from django.contrib import messages
-from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponse
-from django.http import JsonResponse
-from django.template.loader import render_to_string
-from django.utils.http import urlencode, urlsafe_base64_decode
-from django.views.decorators.csrf import csrf_exempt
+from django.utils.http import urlsafe_base64_decode
 from django.urls import reverse
 from django.shortcuts import render, redirect
-from django.utils.http import urlsafe_base64_encode
-from django.core.mail import EmailMessage
-from django.utils.encoding import force_bytes, force_text
+from django.utils.encoding import force_text
 
 from console_main.views import login_required, populate_session_vars_from_database, track_page_visit, \
-    get_recent_services
+    get_recent_services, send_email
 from console_main.models import TrackUserPageVisits
 
-from .models import DIDUser, DIDRequest
+from .models import DIDUser
 from .forms import DIDUserCreationForm, DIDUserChangeForm
 from service.forms import SuggestServiceForm
 from .tokens import account_activation_token
-
-
-def check_ela_auth(request):
-    if 'elaState' not in request.session.keys():
-        return JsonResponse({'authenticated': False}, status=403)
-    state = request.session['elaState']
-    try:
-        recently_created_time = timezone.now() - timedelta(minutes=1)
-        did_request_query_result = DIDRequest.objects.get(state=state, created_at__gte=recently_created_time)
-        data = json.loads(did_request_query_result.data)
-        if not data["auth"]:
-            return JsonResponse({'authenticated': False}, status=403)
-        request.session['name'] = data['Nickname']
-        request.session['email'] = data['Email']
-        request.session['did'] = data['DID']
-        if DIDUser.objects.filter(did=data["DID"]).exists() is False:
-            redirect_url = "/login/register"
-            request.session['redirect_success'] = True
-        else:
-            user = DIDUser.objects.get(did=data["DID"])
-            request.session['name'] = user.name
-            request.session['email'] = user.email
-            request.session['did'] = user.did
-            if user.is_active is False:
-                redirect_url = "/"
-                send_email(request, user.email, user)
-                messages.success(request,
-                                 "The email '%s' needs to be verified. Please check your email for confirmation link" % user.email)
-            else:
-                redirect_url = "/login/feed"
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                request.session['logged_in'] = True
-                populate_session_vars_from_database(request, request.session['did'])
-                messages.success(request, "Logged in successfully!")
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'redirect': redirect_url}, status=200)
-
-
-@csrf_exempt
-def did_callback(request):
-    if request.method == 'POST':
-        response = json.loads(request.body)
-        if request.content_type == "application/json" or 'Data' not in response.keys():
-            HttpResponse(status=400)
-        data = json.loads(response['Data'])
-        sig = response['Sign']
-        client_public_key = data['PublicKey']
-
-        r, s = int(sig[:64], 16), int(sig[64:], 16)
-        public_key = SEC1Encoder.decode_public_key(unhexlify(client_public_key), curve.P256)
-        valid = ecdsa.verify((r, s), response['Data'], public_key)
-        if not valid:
-            return JsonResponse({'message': 'Unauthorized'}, status=401)
-        try:
-            recently_created_time = timezone.now() - timedelta(minutes=1)
-            did_request_query_result = DIDRequest.objects.get(state=data["RandomNumber"],
-                                                              created_at__gte=recently_created_time)
-            if not did_request_query_result:
-                return JsonResponse({'message': 'Unauthorized'}, status=401)
-            data["auth"] = True
-            DIDRequest.objects.filter(state=data["RandomNumber"]).update(data=json.dumps(data))
-        except Exception as e:
-            logging.debug(f" Method: did_callback Error: {e}")
-            JsonResponse({'error': str(e)}, status=404)
-
-    return JsonResponse({'result': True}, status=200)
 
 
 def register(request):
@@ -158,27 +76,6 @@ def edit_profile(request):
             return redirect(reverse('login:feed'))
         form = DIDUserChangeForm(instance=request.user)
     return render(request, 'login/edit_profile.html', {'form': form, 'recent_services': recent_services})
-
-
-def send_email(request, to_email, user):
-    current_site = get_current_site(request)
-    mail_subject = 'Activate your Nucleus Console account'
-    message = render_to_string('login/account_activation_email.html', {
-        'user': user,
-        'domain': current_site.domain,
-        'uid': urlsafe_base64_encode(force_bytes(user.did)),
-        'token': account_activation_token.make_token(user),
-    })
-    email = EmailMessage(
-        mail_subject, message, from_email='"Nucleus Console Support Team" <support@nucleusconsole.com>', to=[to_email]
-    )
-    email.content_subtype = 'html'
-    try:
-        email.send()
-        return HttpResponse("Success")
-    except Exception as e:
-        logging.debug(f"Method: send_email Error: {e}")
-        return HttpResponse("Failure")
 
 
 def activate(request, uidb64, token):
