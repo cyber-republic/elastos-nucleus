@@ -1,7 +1,6 @@
 import json
 import gc
 import logging
-import secrets
 
 import csv
 from django.apps import apps
@@ -197,42 +196,6 @@ def activate(request, uidb64, token):
         return redirect(reverse('login:feed'))
     else:
         return HttpResponse('Activation link is invalid!')
-
-
-def sign_in(request):
-    public_key = config('ELA_PUBLIC_KEY')
-    did = config('ELA_DID')
-    app_id = config('ELA_APP_ID')
-    app_name = config('ELA_APP_NAME')
-
-    random = secrets.randbelow(999999999999)
-    request.session['elaState'] = random
-
-    url_params = {
-        'CallbackUrl': config('APP_URL') + '/login/did_callback',
-        'Description': 'Elastos DID Authentication',
-        'AppID': app_id,
-        'PublicKey': public_key,
-        'DID': did,
-        'RandomNumber': random,
-        'AppName': app_name,
-        'RequestInfo': 'Nickname,Email'
-    }
-
-    elephant_url = 'elaphant://identity?' + urlencode(url_params)
-
-    # Save token to the database didauth_requests
-    token = {'state': random, 'data': {'auth': False}}
-
-    DIDRequest.objects.create(state=token['state'], data=json.dumps(token['data']))
-    # Purge old requests for housekeeping. If the time denoted by 'created_by'
-    # is more than 2 minutes old, delete the row
-    stale_time = timezone.now() - timedelta(minutes=2)
-    DIDRequest.objects.filter(created_at__lte=stale_time).delete()
-
-    request.session['elephant_url'] = elephant_url
-
-    return render(request, 'login/sign_in.html')
 
 
 @login_required

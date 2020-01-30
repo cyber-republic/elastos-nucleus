@@ -1,5 +1,9 @@
+import json
 import logging
 import os
+import secrets
+from datetime import timedelta
+from urllib.parse import urlencode
 
 from django.contrib.auth import login
 from django.db.models import F
@@ -12,7 +16,7 @@ from django.utils import timezone
 from django.db import models
 
 from .models import TrackUserPageVisits
-from login.models import DIDUser
+from login.models import DIDUser, DIDRequest
 from service.models import UserServiceSessionVars
 from .settings import MEDIA_ROOT
 
@@ -60,6 +64,38 @@ def landing(request):
         request.session['logged_in'] = True
         populate_session_vars_from_database(request, user.did)
         recent_services = get_recent_services(user.did)
+    else:
+        public_key = config('ELA_PUBLIC_KEY')
+        did = config('ELA_DID')
+        app_id = config('ELA_APP_ID')
+        app_name = config('ELA_APP_NAME')
+
+        random = secrets.randbelow(999999999999)
+        request.session['elaState'] = random
+
+        url_params = {
+            'CallbackUrl': config('APP_URL') + '/login/did_callback',
+            'Description': 'Elastos DID Authentication',
+            'AppID': app_id,
+            'PublicKey': public_key,
+            'DID': did,
+            'RandomNumber': random,
+            'AppName': app_name,
+            'RequestInfo': 'Nickname,Email'
+        }
+
+        elephant_url = 'elaphant://identity?' + urlencode(url_params)
+
+        # Save token to the database didauth_requests
+        token = {'state': random, 'data': {'auth': False}}
+
+        DIDRequest.objects.create(state=token['state'], data=json.dumps(token['data']))
+        # Purge old requests for housekeeping. If the time denoted by 'created_by'
+        # is more than 2 minutes old, delete the row
+        stale_time = timezone.now() - timedelta(minutes=2)
+        DIDRequest.objects.filter(created_at__lte=stale_time).delete()
+
+        request.session['elephant_url'] = elephant_url
     return render(request, 'landing.html', {'recent_services': recent_services})
 
 
