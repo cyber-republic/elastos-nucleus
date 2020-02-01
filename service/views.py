@@ -199,14 +199,19 @@ def verify_and_show(request):
                     "pub": form.cleaned_data.get('public_key'),
                     "sig": form.cleaned_data.get('signature'),
                     "hash": form.cleaned_data.get('file_hash'),
-                    "private_key": form.cleaned_data.get('private_key')
+                    "privateKey": form.cleaned_data.get('private_key')
                 }
                 try:
                     hive = Hive()
                     response = hive.verify_and_show(api_key, network, request_input)
                     if response.status:
                         request.session['verify_and_show_submit'] = True
-                        content = json.loads(response.output)["result"]["output"]
+                        try:
+                            content = response.file_content.decode()
+                        except UnicodeDecodeError:
+                            response = HttpResponse(response.file_content, content_type='application/octet-stream')
+                            response['Content-Disposition'] = 'attachment; filename=file_from_hive'
+                            return response
                         return render(request, 'service/verify_and_show.html',
                                       {'output': True, 'content': content, 'sample_code': sample_code,
                                        'recent_services': recent_services})
@@ -621,36 +626,7 @@ def run_eth_contract(request):
                   {'sample_code': sample_code, 'recent_services': recent_services})
 
 
-@login_required
-def suggest_service(request):
-    did = request.session['did']
-    if request.is_ajax():
-        category = request.POST.get('category')
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        reasoning = request.POST.get('reasoning')
-        content = render_to_string('service/suggest_service_email.html', {
-            'service_category': category,
-            'service_name': title,
-            'service_description': description,
-            'service_reasoning': reasoning
-        })
-        email = EmailMessage(subject="Suggested Service",
-                             body=content,
-                             from_email='"Nucleus Console Support Team" <support@nucleusconsole.com>',
-                             to=['support@nucleusconsole.com'])
-        email.content_subtype = 'html'
-        try:
-            email.send()
-            return HttpResponse("Success")
-        except Exception as e:
-            logging.debug(f"did={did} Method: suggest_service Error: {e}")
-            return HttpResponse("Failure")
 
-    else:
-        track_page_visit(did, 'Suggest a new service', 'service:suggest_service', True)
-        recent_services = get_recent_services(did)
-        return render(request, "service/suggest_service.html", {'recent_services': recent_services})
 
 
 
