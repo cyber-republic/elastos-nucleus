@@ -21,6 +21,7 @@ function csrfSafeMethod(method) {
 }
 
 function deletefiles() {
+    alert("Deleting Files");
     var csrftoken = getCookie('csrftoken');
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
