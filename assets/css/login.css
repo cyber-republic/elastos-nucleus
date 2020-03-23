@@ -176,6 +176,7 @@
 }
 
 .container img.rounded {
+  object-fit: contain;
   width: 25%;
   max-width: 25%;
   margin-bottom: 15px; 
