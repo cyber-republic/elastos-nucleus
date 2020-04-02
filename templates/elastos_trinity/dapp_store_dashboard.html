@@ -29,10 +29,10 @@ elastOS - dApp Store Dashboard
                     <p class="dapp-description font-weight-light">{{ dapp.appDescription }}</p>
                     <div class="row">
                         <a href="{{ dapp.download_url }}" class="btn btn-secondary rounded-pill download">Download</a>
-                        <a class="btn btn-secondary rounded-pill more" data-toggle="modal" data-target="#{{ dapp.uniqueName|cut:" " }}">More</a>
+                        <a class="btn btn-secondary rounded-pill more" data-toggle="modal" data-target="#{{ dapp.uniqueName|cut:"-" }}">More</a>
                     </div>
                 </div>
-                <div class="modal fade" id="{{ dapp.uniqueName|cut:" " }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal fade" id="{{ dapp.uniqueName|cut:"-" }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-body" style="padding-left: 25px; padding-right: 25px;">

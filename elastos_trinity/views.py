@@ -1,3 +1,4 @@
+import namegenerator
 from decouple import config
 from django.shortcuts import render
 
@@ -18,7 +19,7 @@ def dapp_store_dashboard(request):
     dapp_store_url = config('ELASTOS_TRINITY_DAPPSTORE_URL')
     for dapp in dapps_list:
         createdAt = dapp["createdAt"][:10]
-        uniqueName = ''.join([i for i in dapp["appName"] if not i.isdigit()])
+        uniqueName = namegenerator.gen()
         dapp["uniqueName"] = uniqueName
         dapp["createdAt"] = createdAt
         dapp["id"] = dapp["_id"]
