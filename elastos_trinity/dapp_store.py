@@ -19,5 +19,3 @@ class DAppStore:
         response = self.session.get(url, timeout=self.timeout)
         data = json.loads(response.text)
         return data
-
-
