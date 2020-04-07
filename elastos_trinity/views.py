@@ -1,9 +1,8 @@
-import json
-import os
+import logging
+
 import requests
 from decouple import config
 from django.shortcuts import render
-from django.http import HttpResponse
 from console_main.views import login_required, track_page_visit, get_recent_services
 from elastos_trinity.dapp_store import DAppStore
 
@@ -26,24 +25,25 @@ def dapp_store_dashboard(request):
     context['dapps_list'] = dapps_list
     return render(request, "elastos_trinity/dapp_store_dashboard.html", context)
 
+
+@login_required
 def dapp_templates(request):
+    context = {}
+    did = request.session['did']
     if request.method == "POST":
-        context = {}
-        name = request.POST.get('name')
-        is_angular = False
-        dapp_url = get_dapp_link(name)
-        github_link = get_github_link(name)
-        download_link = get_download_link(name)
-        get_github_api_link(name)
+        dapp_id = request.POST.get('dapp_id')
+        dapp_url = get_dapp_link(dapp_id)
+        github_link = get_github_link(dapp_id)
+        download_link = get_download_link(dapp_id)
+        get_github_api_link(dapp_id)
         angular_check = dapp_url + "angular.json"
+        is_angular = False
         try:
             angular_request = requests.get(angular_check)
             if int(angular_request.status_code) == 200:
                 is_angular = True
-            else:
-                is_angular = False
         except Exception as e:
-            print("error in angular_check")
+            logging.debug(f"Method: dapp_templates Type: angular_check Error: {e}")
 
         if is_angular:
             request_string = dapp_url + "src/assets/manifest.json"
@@ -53,8 +53,8 @@ def dapp_templates(request):
         try:
             manifest = requests.get(request_string)
             json_dict = manifest.json()
-        except:
-            print("error in getting manifest files")
+        except Exception as e:
+            logging.debug(f"Method: dapp_templates Type: manifest_check Error: {e}")
 
         logo_location = json_dict['icons'][1].get('src')
         if is_angular:
@@ -63,26 +63,26 @@ def dapp_templates(request):
             logo_string = dapp_url + "public/" + logo_location
 
         readme_url = dapp_url + "README.md"
-        readmehtml = ""
+        readme_html = ""
         try:
             readme = requests.get(readme_url)
             readme = readme.text
             headers = {
                 "Content-Type": "text/plain"
             }
-            readmehtml = requests.post('https://api.github.com/markdown/raw', headers=headers, data=readme)
-            readmehtml = readmehtml.text
+            readme_html = requests.post('https://api.github.com/markdown/raw', headers=headers, data=readme)
+            readme_html = readme_html.text
         except Exception as e:
-            print("error in getting readmefile")
+            logging.debug(f"Method: dapp_templates Type: readme_check Error: {e}")
 
-        github_data = get_github_api_link(name)
+        github_data = get_github_api_link(dapp_id)
         try:
             github_dict = requests.get(github_data)
             github_dict = github_dict.json()
             created_at = get_date(github_dict['created_at'])
             updated_at = get_date(github_dict['updated_at'])
-        except:
-            print("error getting repo data")
+        except Exception as e:
+            logging.debug(f"Method: dapp_templates Type: repo_data_check Error: {e}")
 
         context['template'] = json_dict
         context['logo_url'] = logo_string
@@ -91,27 +91,23 @@ def dapp_templates(request):
         context['version'] = json_dict['version']
         context['whitelisted_urls'] = json_dict['urls']
         context['plugins'] = json_dict['plugins']
-        context['readme'] = readmehtml
+        context['readme'] = readme_html
         context['created_at'] = created_at
         context['updated_at'] = updated_at
         return render(request, 'elastos_trinity/daap_template_application.html', context)
     else:
         context = {}
-        did = request.session['did']
         template_apps = get_dapp_list()
-        jsonfiles = {"angular": [], "react": []}
-        is_angular = False
+        json_files = {"angular": [], "react": []}
         for items in template_apps:
             angular_check = items + "angular.json"
-            print(angular_check)
+            is_angular = False
             try:
                 angular_request = requests.get(angular_check)
                 if int(angular_request.status_code) == 200:
                     is_angular = True
-                else:
-                    is_angular = False
-            except:
-                print("error in angular_check")
+            except Exception as e:
+                logging.debug(f"Method: dapp_templates Type: angular_check Error: {e}")
                 continue
             if is_angular:
                 request_string = items + "src/assets/manifest.json"
@@ -120,28 +116,26 @@ def dapp_templates(request):
             try:
                 manifest = requests.get(request_string)
                 json_dict = manifest.json()
-                json_dict_1 = manifest.json()
-                dapp_url = get_dapp_link(json_dict['name'])
+                dapp_url = get_dapp_link(json_dict['id'])
                 logo_location = json_dict['icons'][1].get('src')
                 if is_angular:
                     logo_string = dapp_url + "src/" + logo_location
                 else:
                     logo_string = dapp_url + "public/" + logo_location
-
                 json_dict['logo_url'] = logo_string
                 if is_angular:
-                    jsonfiles["angular"].append(json_dict)
+                    json_files["angular"].append(json_dict)
                 else:
-                    jsonfiles["react"].append(json_dict)
-            except:
-                print("error with manifest request")
+                    json_files["react"].append(json_dict)
+            except Exception as e:
+                logging.debug(f"Method: dapp_templates Type: manifest_check Error: {e}")
                 continue
 
-        context['templates'] = jsonfiles
+        context['templates'] = json_files
         context['recent_services'] = get_recent_services(did)
         return render(request, 'elastos_trinity/dapp_template.html', context)
 
 
 def get_date(datetime):
-    datetimelist = datetime.split('T')
-    return datetimelist[0]
+    datetime_list = datetime.split('T')
+    return datetime_list[0]

@@ -1,7 +1,8 @@
 dapp_dict = {
-    "angular hello world": "https://raw.githubusercontent.com/Ashwin-Pokharel/dappangularhelloworld/master/",
-    "react hello world": "https://raw.githubusercontent.com/Ashwin-Pokharel/dappreacthelloworld/master/",
+    "tech.tuum.dapptemplatebasicangular": "https://raw.githubusercontent.com/tuum-tech/dapp_template_basic_angular/master/",
+    "tech.tuum.dapptemplatebasicreact": "https://raw.githubusercontent.com/tuum-tech/dapp_template_basic_react/master/"
 }
+
 
 def get_dapp_list():
     dapp_list = []
@@ -10,15 +11,13 @@ def get_dapp_list():
     return dapp_list
 
 
-def get_dapp_link(name):
-    name = name.lower()
-    name = name.strip()
-    return dapp_dict.get(name)
+def get_dapp_link(dapp_id):
+    return dapp_dict.get(dapp_id)
 
 
-def get_github_link(name):
+def get_github_link(dapp_id):
     github_base = 'https://github.com/'
-    raw_list = get_dapp_link(name)
+    raw_list = get_dapp_link(dapp_id)
     raw_list = raw_list.split('/')
     raw_list = raw_list[3:6]
     raw_list = raw_list[:-1]
@@ -28,20 +27,21 @@ def get_github_link(name):
         github_base += i
     return github_base
 
-def get_github_api_link(name):
+
+def get_github_api_link(dapp_id):
     github_api = "https://api.github.com/repos/"
-    raw_list = get_dapp_link(name).split('/')
+    raw_list = get_dapp_link(dapp_id).split('/')
     raw_list = raw_list[3:5]
-    for i in range(0, len(raw_list)-1):
+    for i in range(0, len(raw_list) - 1):
         raw_list[i] = raw_list[i] + "/"
     for i in raw_list:
         github_api += i
     return github_api
 
 
-def get_download_link(name):
+def get_download_link(dapp_id):
     github_base = 'https://github.com/'
-    raw_list = get_dapp_link(name)
+    raw_list = get_dapp_link(dapp_id)
     raw_list = raw_list.split('/')
     branch = raw_list[5]
     raw_list = raw_list[3:6]
@@ -54,7 +54,5 @@ def get_download_link(name):
     return github_base
 
 
-def add_template_app(name , url):
-    name = name.lower()
-    name = name.strip()
-    dapp_dict[name] = url
+def add_template_app(dapp_id, url):
+    dapp_dict[dapp_id] = url
