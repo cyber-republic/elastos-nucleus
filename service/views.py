@@ -58,12 +58,9 @@ def generate_key(request):
                         populate_session_vars_from_database(request, did)
                         output['get_api_key'] = True
                     else:
-                        print("1")
                         error_message = response['status_message']
                 elif 'submit_generate_api_key' in request.POST:
-                    print(SHARED_SECRET_ADENINE, did)
                     response = common.generate_api_request(SHARED_SECRET_ADENINE, did)
-                    print(response)
                     if response['status']:
                         data = json.loads(response['output'])
                         api_key = data['result']['api_key']
@@ -74,7 +71,6 @@ def generate_key(request):
                         populate_session_vars_from_database(request, did)
                         output['generate_api_key'] = True
                     else:
-                        print("2")
                         error_message = response['status_message']
                 else:
                     error_message = "Invalid form submission. Please refresh the page and try generating a new API " \

@@ -140,7 +140,6 @@ def feed(request):
                 if model_found:
                     break
 
-    print(your_activity_list)
     return render(request, 'login/feed.html', {'recent_pages': recent_pages, 'recent_services': recent_services,
                                                'most_visited_pages': most_visited_pages, 'suggest_form': suggest_form,
                                                'your_activity': your_activity_list})
