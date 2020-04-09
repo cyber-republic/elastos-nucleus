@@ -1,6 +1,7 @@
 import gc
 import logging
 
+import json
 import csv
 
 from django.apps import apps
@@ -44,7 +45,8 @@ def register(request):
             send_email(request, to_email, user)
             request.session['name'] = user.name
             request.session['email'] = user.email
-            messages.success(request, "Please check your email to complete your registration")
+            messages.success(
+                request, "Please check your email to complete your registration")
             return redirect(reverse('landing'))
     else:
         form = DIDUserCreationForm(initial={'name': request.session['name'], 'email': request.session['email'],
@@ -69,7 +71,8 @@ def edit_profile(request):
                 user.save()
                 to_email = form.cleaned_data.get('email')
                 send_email(request, to_email, user)
-                messages.success(request, "Please check your email to finish modifying your profile info")
+                messages.success(
+                    request, "Please check your email to finish modifying your profile info")
             else:
                 user.save()
             return redirect(reverse('login:feed'))
@@ -105,8 +108,10 @@ def feed(request):
     suggest_form = SuggestServiceForm()
     did = request.session['did']
     recent_services = get_recent_services(did)
-    recent_pages = TrackUserPageVisits.objects.filter(did=did).order_by('-last_visited')[:9]
-    most_visited_pages = TrackUserPageVisits.objects.filter(did=did).order_by('-number_visits')[:5]
+    recent_pages = TrackUserPageVisits.objects.filter(
+        did=did).order_by('-last_visited')[:9]
+    most_visited_pages = TrackUserPageVisits.objects.filter(
+        did=did).order_by('-number_visits')[:5]
     your_activity_list = []
     all_apps = settings.ALL_APPS
     for items in recent_pages:
@@ -124,7 +129,8 @@ def feed(request):
                     try:
                         if model.__name__ == your_activity_model:
                             obj_model = model.objects.filter(did=did).last()
-                            your_activity_list.append(obj_model.your_activity()[view_name])
+                            your_activity_list.append(
+                                obj_model.your_activity()[view_name])
                             model_found = True
                             break
                     except Exception as e:
@@ -134,6 +140,7 @@ def feed(request):
                 if model_found:
                     break
 
+    print(your_activity_list)
     return render(request, 'login/feed.html', {'recent_pages': recent_pages, 'recent_services': recent_services,
                                                'most_visited_pages': most_visited_pages, 'suggest_form': suggest_form,
                                                'your_activity': your_activity_list})
@@ -176,7 +183,8 @@ def suggest_service(request):
             messages.success(request, "Service suggestion was submitted")
         except Exception as e:
             logging.debug(f"did={did} Method: suggest_service Error: {e}")
-            messages.success(request, "Service suggestion could not be submitted at this time. Please try again")
+            messages.success(
+                request, "Service suggestion could not be submitted at this time. Please try again")
         finally:
             return redirect(reverse('login:feed'))
 
@@ -192,7 +200,8 @@ def get_user_data(request):
         app_models = apps.get_app_config(items).get_models()
         for model in app_models:
             try:
-                model.objects.filter(did=request.session['did'])  # ahead to check if there's any entry with
+                # ahead to check if there's any entry with
+                model.objects.filter(did=request.session['did'])
                 # the given did
                 writer.writerow([model.user_name()])
                 fields = [f.name for f in model._meta.get_fields()]
