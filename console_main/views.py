@@ -337,9 +337,9 @@ def populate_session_vars_from_database(request, did):
     request.session['private_key_eth'] = private_key_eth
 
 
-def track_page_visit(did, name, view, is_service , activtiy= False , additional_field = ''):
+def track_page_visit(did, name, view, is_service , activtiy= False, additional_field = ''):
     try:
-        track_obj = TrackUserPageVisits.objects.get(did=did, name=name, view=view, is_service=is_service)
+        track_obj = TrackUserPageVisits.objects.get(did=did, name=name, view=view, is_service=is_service , activity_completed=activtiy)
         track_obj.name = name
         track_obj.view = view
         track_obj.last_visited = timezone.now()
@@ -356,7 +356,7 @@ def track_page_visit(did, name, view, is_service , activtiy= False , additional_
 
 
 def get_recent_services(did):
-    recent_services = TrackUserPageVisits.objects.filter(did=did, is_service=True).order_by('-last_visited')[:5]
+    recent_services = TrackUserPageVisits.objects.filter(did=did, is_service=True , activity_completed=False).order_by('-last_visited')[:5]
     return recent_services
 
 

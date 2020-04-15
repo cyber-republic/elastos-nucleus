@@ -249,6 +249,7 @@ def verify_and_show(request):
                             response = HttpResponse(file_content, content_type='application/octet-stream')
                             response['Content-Disposition'] = 'attachment; filename=file_from_hive'
                             return response
+                        track_page_visit(did, 'Verify And Show', 'service:verify_and_show', True, True)
                         return render(request, 'service/verify_and_show.html',
                                       {'output': True, 'content': content, 'sample_code': sample_code,
                                        'recent_services': recent_services})
