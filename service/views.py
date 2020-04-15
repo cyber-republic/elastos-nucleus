@@ -57,6 +57,7 @@ def generate_key(request):
                         obj.save()
                         populate_session_vars_from_database(request, did)
                         output['get_api_key'] = True
+                        token = 'get'
                     else:
                         error_message = response['status_message']
                 elif 'submit_generate_api_key' in request.POST:
@@ -70,6 +71,7 @@ def generate_key(request):
                         obj.save()
                         populate_session_vars_from_database(request, did)
                         output['generate_api_key'] = True
+                        token = 'generate'
                     else:
                         error_message = response['status_message']
                 else:
@@ -80,7 +82,7 @@ def generate_key(request):
                     return redirect(reverse('service:generate_key'))
                 else:
                     request.session['api_key'] = api_key
-                    track_page_visit(did , 'Generate API Key' , "service:generate_key" , True , True)
+                    track_page_visit(did , 'Generate API Key' , "service:generate_key" , True , True , token)
                     return render(request, "service/generate_key.html",
                                   {'output': output, 'api_key': api_key, 'sample_code': sample_code,
                                    'recent_services': recent_services})
@@ -249,6 +251,7 @@ def verify_and_show(request):
                             response = HttpResponse(file_content, content_type='application/octet-stream')
                             response['Content-Disposition'] = 'attachment; filename=file_from_hive'
                             return response
+                        track_page_visit(did, 'Verify And Show', 'service:verify_and_show', True, True)
                         return render(request, 'service/verify_and_show.html',
                                       {'output': True, 'content': content, 'sample_code': sample_code,
                                        'recent_services': recent_services})
@@ -506,6 +509,7 @@ def request_ela(request):
                     content = json.loads(response['output'])['result']
                     address[chain] = content['address']
                     deposit_amount[chain] = content['deposit_amount']
+                    track_page_visit(did, 'Request ELA', 'service:request_ela', True , True , chain)
                     return render(request, "service/request_ela.html", {'output': output, 'form': form_to_display,
                                                                         'address': address,
                                                                         'deposit_amount': deposit_amount,
@@ -571,6 +575,7 @@ def deploy_eth_contract(request):
                         contract_address = data['result']['contract_address']
                         contract_name = data['result']['contract_name']
                         contract_code_hash = data['result']['contract_code_hash']
+                        track_page_visit(did, 'Deploy ETH Contract', 'service:deploy_eth_contract', True , True)
                         return render(request, "service/deploy_eth_contract.html",
                                       {"contract_address": contract_address, "contract_name": contract_name,
                                        "contract_code_hash": contract_code_hash, 'output': True,
@@ -627,6 +632,7 @@ def watch_eth_contract(request):
                         contract_address = data['result']['contract_address']
                         contract_functions = data['result']['contract_functions']
                         contract_source = data['result']['contract_source']
+                        track_page_visit(did, 'Watch ETH Contract', 'service:watch_eth_contract', True , True)
                         return render(request, "service/watch_eth_contract.html",
                                       {'output': True, 'contract_address': contract_address,
                                        'contract_name': contract_name,

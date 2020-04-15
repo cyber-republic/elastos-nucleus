@@ -43,9 +43,16 @@ class UserServiceSessionVars(models.Model):
     def your_activity(self):
         return {
             'generate_key': {
-                'display_string': 'Generated a new API Key',
-                'did': None,
-                'api_key': None,
+                'generate':{
+                    'display_string': 'You generated a new API Key',
+                    'did': None,
+                    'api_key': None,
+                    },
+                'get':{
+                    'display_string': 'You received your old API Key',
+                    'did': None,
+                    'api_key': None,
+                }
             },
             'create_wallet': {
                 'display_string': 'Created a new wallet',
@@ -91,15 +98,55 @@ class UserServiceSessionVars(models.Model):
                         'private_key_eth': None,
                     },
                 'token':
-                {
-                    'display_string': 'You just viewed your wallet for Token Sidechain',
-                    'did': None,
-                    'api_key': None,
-                    'mnemonic_mainchain': None,
-                    'private_key_mainchain': None,
-                    'public_key_mainchain': self.public_key_mainchain,
-                    'address_mainchain': self.address_mainchain,
-                },
+                    {
+                        'display_string': 'You just viewed your wallet for Token Sidechain',
+                        'did': None,
+                        'api_key': None,
+                        'mnemonic_mainchain': None,
+                        'private_key_mainchain': None,
+                        'public_key_mainchain': self.public_key_mainchain,
+                        'address_mainchain': self.address_mainchain,
+                    },
+            },
+            'request_ela': {
+                'mainchain':
+                    {
+                        'display_string': 'You just requested ELA for Mainchain',
+                        'did': None,
+                        'api_key': None,
+                        'mnemonic_mainchain': None,
+                        'private_key_mainchain': None,
+                        'public_key_mainchain': self.public_key_mainchain,
+                        'address_mainchain': self.address_mainchain,
+                    },
+                'did':
+                    {
+                        'display_string': 'You just requested ELA for DID Sidechain',
+                        'did': None,
+                        'api_key': None,
+                        'private_key_did': None,
+                        'public_key_did': self.public_key_did,
+                        'address_did': self.address_did,
+                        'did_did': self.did_did,
+                    },
+                'eth':
+                    {
+                        'display_string': 'You just requested ELA for ETH Sidechain',
+                        'did': None,
+                        'api_key': None,
+                        'address_eth': self.address_eth,
+                        'private_key_eth': None,
+                    },
+                'token':
+                    {
+                        'display_string': 'You just requested ELA for Token Sidechain',
+                        'did': None,
+                        'api_key': None,
+                        'mnemonic_mainchain': None,
+                        'private_key_mainchain': None,
+                        'public_key_mainchain': self.public_key_mainchain,
+                        'address_mainchain': self.address_mainchain,
+                    },
             }
         }
 
