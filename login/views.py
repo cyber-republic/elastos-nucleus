@@ -107,9 +107,10 @@ def feed(request):
     recent_services = get_recent_services(did)
     recent_pages = TrackUserPageVisits.objects.filter(did=did).order_by('-last_visited')[:9]
     most_visited_pages = TrackUserPageVisits.objects.filter(did=did).order_by('-number_visits')[:5]
+    activity_pages = TrackUserPageVisits.objects.filter(did = did , activity_completed=True).order_by('-last_visited')[:9]
     your_activity_list = []
     all_apps = settings.ALL_APPS
-    for items in recent_pages:
+    for items in activity_pages:
         model_found = False
         view_name = items.view.split(':')[1]  # get the view name
         your_activity_model = get_activity_model(view_name)
@@ -124,9 +125,20 @@ def feed(request):
                     try:
                         if model.__name__ == your_activity_model:
                             obj_model = model.objects.filter(did=did).last()
-                            your_activity_list.append(obj_model.your_activity()[view_name])
-                            model_found = True
-                            break
+                            if items.additional_field != '':
+                                try:
+                                    your_activity_list.append(obj_model.your_activity()[view_name][items.additional_field])
+                                    model_found = True
+                                    break
+                                except KeyError as e:
+                                    your_activity_list.append({
+                                        'display_string': 'You just visited "{0}" page'.format(items.name)
+                                    })
+                                    logging.debug(e)
+                            else:
+                                your_activity_list.append(obj_model.your_activity()[view_name])
+                                model_found = True
+                                break
                     except Exception as e:
                         your_activity_list.append({
                             'display_string': 'You just visited "{0}" page'.format(items.name)

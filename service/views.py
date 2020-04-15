@@ -80,6 +80,7 @@ def generate_key(request):
                     return redirect(reverse('service:generate_key'))
                 else:
                     request.session['api_key'] = api_key
+                    track_page_visit(did , 'Generate API Key' , "service:generate_key" , True , True)
                     return render(request, "service/generate_key.html",
                                   {'output': output, 'api_key': api_key, 'sample_code': sample_code,
                                    'recent_services': recent_services})
@@ -117,12 +118,14 @@ def upload_and_sign(request):
         if userFileCount >= 50:
             request.session['upload_and_sign_submit'] = True
             messages.warning(request, "you have reached the total number of files")
-            request.session['upload_and_sign_submit'] = True
             form = UploadAndSignForm(initial={'did': did, 'api_key': request.session['api_key'],
                                               'private_key': request.session['private_key_mainchain']})
+
+
             return render(request, "service/upload_and_sign.html",
                           {'form': form, 'output': False, 'sample_code': sample_code,
                            'recent_services': recent_services, 'total_reached': True})
+
         if not request.session['upload_and_sign_submit']:
             # Purge old requests for housekeeping.
             UploadFile.objects.filter(did=did).delete()
@@ -172,6 +175,8 @@ def upload_and_sign(request):
                             SavedFileInformation.objects.update_or_create(did=did, file_name=file_name,
                                                                           message_hash=message_hash,
                                                                           signature=signature, file_hash=file_hash)
+
+                        track_page_visit(did , 'Upload And Sign' , "service:upload_and_sign" , True , True)
                         return render(request, "service/upload_and_sign.html",
                                       {"message_hash": message_hash, "public_key": public_key, "signature": signature,
                                        "file_hash": file_hash, 'output': True, 'sample_code': sample_code,
@@ -328,6 +333,7 @@ def create_wallet(request):
                                                                                                          'private_key']})
                         obj.save()
                         populate_session_vars_from_database(request, did)
+                        track_page_visit(did , 'Create Wallet', "service:create_wallet" , True , True)
                         return render(request, "service/create_wallet.html",
                                       {'output': True, 'wallet_mainchain': wallet_mainchain,
                                        'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth,
@@ -415,6 +421,7 @@ def view_wallet(request):
                     content = json.loads(response['output'])['result']
                     address[chain] = content['address']
                     balance[chain] = content['balance']
+                    track_page_visit(did, 'View Wallet', 'service:view_wallet', True, True, chain)
                     return render(request, "service/view_wallet.html", {'output': output, 'form': form_to_display,
                                                                         'address': address, 'balance': balance,
                                                                         'sample_code': sample_code,

@@ -337,7 +337,7 @@ def populate_session_vars_from_database(request, did):
     request.session['private_key_eth'] = private_key_eth
 
 
-def track_page_visit(did, name, view, is_service):
+def track_page_visit(did, name, view, is_service , activtiy= False , additional_field = ''):
     try:
         track_obj = TrackUserPageVisits.objects.get(did=did, name=name, view=view, is_service=is_service)
         track_obj.name = name
@@ -345,9 +345,11 @@ def track_page_visit(did, name, view, is_service):
         track_obj.last_visited = timezone.now()
         track_obj.number_visits = F('number_visits') + 1
         track_obj.is_service = is_service
+        track_obj.activity_completed = activtiy
+        track_obj.additional_field = additional_field
         track_obj.save()
     except models.ObjectDoesNotExist:
-        track_obj = TrackUserPageVisits.objects.create(did=did, name=name, view=view, number_visits=1, is_service=is_service)
+        track_obj = TrackUserPageVisits.objects.create(did=did, name=name, view=view, number_visits=1, is_service=is_service , activity_completed=activtiy , additional_field=additional_field)
         track_obj.save()
     except Exception as e:
         logging.debug(e)
