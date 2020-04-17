@@ -43,13 +43,13 @@ class UserServiceSessionVars(models.Model):
     def your_activity(self):
         return {
             'generate_key': {
-                'generate':{
+                'generate': {
                     'display_string': 'You generated a new API Key',
                     'did': None,
                     'api_key': None,
-                    },
-                'get':{
-                    'display_string': 'You received your old API Key',
+                },
+                'get': {
+                    'display_string': 'You viewed your existing API Key',
                     'did': None,
                     'api_key': None,
                 }
@@ -91,12 +91,12 @@ class UserServiceSessionVars(models.Model):
                         'did_did': self.did_did,
                     },
                 'eth': {
-                        'display_string': 'You just viewed your wallet for ETH Sidechain',
-                        'did': None,
-                        'api_key': None,
-                        'address_eth': self.address_eth,
-                        'private_key_eth': None,
-                    },
+                    'display_string': 'You just viewed your wallet for ETH Sidechain',
+                    'did': None,
+                    'api_key': None,
+                    'address_eth': self.address_eth,
+                    'private_key_eth': None,
+                },
                 'token':
                     {
                         'display_string': 'You just viewed your wallet for Token Sidechain',
@@ -111,7 +111,7 @@ class UserServiceSessionVars(models.Model):
             'request_ela': {
                 'mainchain':
                     {
-                        'display_string': 'You just requested ELA for Mainchain',
+                        'display_string': 'You just requested ELA for Mainchain Wallet',
                         'did': None,
                         'api_key': None,
                         'mnemonic_mainchain': None,
@@ -121,17 +121,17 @@ class UserServiceSessionVars(models.Model):
                     },
                 'did':
                     {
-                        'display_string': 'You just requested ELA for DID Sidechain',
+                        'display_string': 'You just requested ELA for DID Sidechain Wallet',
                         'did': None,
                         'api_key': None,
                         'private_key_did': None,
                         'public_key_did': self.public_key_did,
                         'address_did': self.address_did,
-                        'did_did': self.did_did,
+                        'did_did': None,
                     },
                 'eth':
                     {
-                        'display_string': 'You just requested ELA for ETH Sidechain',
+                        'display_string': 'You just requested ELA for ETH Sidechain Wallet',
                         'did': None,
                         'api_key': None,
                         'address_eth': self.address_eth,
@@ -139,7 +139,7 @@ class UserServiceSessionVars(models.Model):
                     },
                 'token':
                     {
-                        'display_string': 'You just requested ELA for Token Sidechain',
+                        'display_string': 'You just requested ELA for Token Sidechain Wallet',
                         'did': None,
                         'api_key': None,
                         'mnemonic_mainchain': None,
