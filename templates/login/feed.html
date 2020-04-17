@@ -248,8 +248,52 @@
         </div>
 
         <div class="row">
-            <!-- Deployed Apps Row -->
-            <div class="col-3 console-services">
+            <!-- User Activity Row -->
+            <div class="col console-services">
+                <p style="float: left; margin: 15px;">
+                    <img src="{% static 'images/common/show.svg' %}"/>
+                </p>
+                <p class="console-services-title" style="margin: 20px;">
+                    YOUR ACTIVITY
+                </p>
+                <div class="divider"></div>
+                <div class="row" style="margin-left: 30px; margin-right: 30px">
+                    <div class="wrapper">
+                    <div class="activity-accordion" id="accordion">
+                        {% for activity in your_activity %}
+                            <div class="card-transparent text-white border-dark mb-3">
+                                {% for key, value in activity.items %}
+                                    {% if 'display_string' in key %}
+                                        <div class="card-header" id="heading{{ forloop.parentloop.counter }}">
+                                            <h5 class="mb-0">
+                                                <button class="text-white btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{ forloop.parentloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.parentloop.counter }}">
+                                                    {{ value }}
+                                                </button>
+                                            </h5>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                        <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" data-parent="#accordion">
+                                            <div class="card-body">
+                                            {% for ind, child in activity.items %}
+                                                <div class="row" style="margin-left: 0px">
+                                                    <p class="text-white font-weight-bold" style="padding-right: 4px">'{{ ind }}': </p>
+                                                    <p class="text-white font-weight-normal">'{{ child }}'</p>
+                                                </div>
+                                            {% endfor %}
+                                            </div>
+                                        </div>
+                            </div>
+                            <div class="divider"></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col console-services">
                 <p style="float: left; margin: 15px;">
                     <img src="{% static 'images/common/contract.svg' %}"/>
                 </p>
@@ -287,53 +331,6 @@
                             COMING SOON<br><br>
                             Category: <span class="console-services-category">APP #3</span>
                         </p>
-                    </div>
-                </div>
-            </div>
-            <!-- User Activity Row -->
-            <div class="col-8 console-services">
-                <p style="float: left; margin: 15px;">
-                    <img src="{% static 'images/common/show.svg' %}"/>
-                </p>
-                <p class="console-services-title" style="margin: 20px;">
-                    YOUR ACTIVITY
-                </p>
-                <div class="divider"></div>
-                <div class="row">
-                    <div class="col-5">
-                        {% for activity in your_activity %}
-                            {% for key, value in activity.items %}
-                                {% if 'display_string' in key %}
-                                    <div class="container">
-                                        <div class="d-flex justify-content-between w-90" style="padding-left: 10px;">
-                                            <p class="sidebar-content">
-                                                {{ value }}
-                                            </p> 
-                                            <button class="btn btn-outline-dark text-white" type="button" data-toggle="collapse" data-target="#info{{ forloop.parentloop.counter }}" aria-expanded="false" aria-controls="collapseExample">
-                                                >
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="divider" style="margin-top: 10px !important;"></div>
-                                {% endif %}
-                            {% endfor %}
-                        {% endfor %}
-                    </div>
-                    <div class="col-7">
-                        {% for activity in your_activity %}
-                            <div class="collapse" id="info{{ forloop.counter }}">
-                                <p class="font-weight-bold text-white">
-                                    Activity Information
-                                </p>
-                                <div class="divider" style="margin-top: 10px !important; margin-left: 0px !important;"></div>
-                                {% for key, value in activity.items %}
-                                    <div class="row" style="margin-left: 0px">
-                                        <p class="text-white font-weight-bold" style="padding-right: 4px">'{{ key }}': </p>
-                                        <p class="text-white font-weight-normal">'{{ value }}'</p>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
                     </div>
                 </div>
             </div>

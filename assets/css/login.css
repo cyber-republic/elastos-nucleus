@@ -217,3 +217,7 @@
   letter-spacing: normal;
   color: #ffffff;
 }
+
+.wrapper {
+  width: 100% !important;
+}
