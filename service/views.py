@@ -544,7 +544,7 @@ def deploy_eth_contract(request):
     if request.method == 'POST':
         if not request.session['deploy_eth_contract_submit']:
             # Purge old requests for housekeeping.
-            if len(SavedETHContractInformation.objects.filter(did=did)) >= 2:
+            if len(SavedETHContractInformation.objects.filter(did=did)) >= 50:
                 request.session['deploy_eth_contract_submit'] = False
                 form = DeployETHContractForm(initial={'did': did, 'api_key': request.session['api_key'],
                                                       'eth_account_address': request.session['address_eth'],
