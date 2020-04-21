@@ -115,3 +115,34 @@ class SavedFileInformation(models.Model):
                 'file_hash': self.file_hash,
             }
         }
+
+
+class SavedETHContractInformation(models.Model):
+    did = models.CharField(max_length=64, null=False)
+    file_name = models.CharField(max_length=100 , null=False)
+    contract_name = models.CharField(max_length=300, null=False)
+    contract_address = models.CharField(max_length=300, null=False)
+    contract_code_hash = models.CharField(max_length=300, null=False)
+
+    def __str__(self):
+        return self.file_name
+
+    @staticmethod
+    def user_name():
+        return 'Uploaded ETH Contract Information'
+
+    def your_activity(self):
+        return {
+            'deploy_eth_contract': {
+                'display_string':"You just uploaded {0} contract to ETH SideChain.".format(self.file_name),
+                'contract_name': self.contract_name,
+                'contract_address': self.contract_address,
+                'contract_code_hash': None
+            },
+            'watch_eth_contract': {
+                'display_string':"You just viewed {0} contract in the ETH SideChain".format(self.file_name),
+                'contract_name': self.contract_name,
+                'contract_address': self.contract_address,
+                'contract_code_hash': None
+            }
+        }

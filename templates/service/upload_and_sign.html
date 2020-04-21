@@ -159,14 +159,14 @@
                     <div class="modal-body">
                         <div class="form-group-sm">
                             <p>
-                                You have reached the limit on how many files can be uploaded to the upload and sign service.
+                                You have reached the limit on the number of file information that can be saved by Nucleus Console.
                                 If you want to continue uploading content please select the option below to remove your previous files.
                                 Your files will still be present in HIVE and can be retrieved.
                             </p>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss="modal" onclick="deletefiles()">Delete</button>
+                        <button class="btn btn-secondary" data-dismiss="modal" onclick={deletefiles('upload_and_sign')}>Remove</button>
                         <button class="btn btn-secondary" type="button"  data-dismiss="modal">Cancel</button>
                     </div>
                 </div>

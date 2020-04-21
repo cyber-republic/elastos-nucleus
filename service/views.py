@@ -25,7 +25,7 @@ from .forms import UploadAndSignForm, VerifyAndShowForm
 from .forms import CreateWalletForm, ViewWalletForm, RequestELAForm
 from .forms import DeployETHContractForm, WatchETHContractForm
 
-from .models import UploadFile, UserServiceSessionVars, SavedFileInformation
+from .models import UploadFile, UserServiceSessionVars, SavedFileInformation, SavedETHContractInformation
 
 
 @login_required
@@ -95,6 +95,7 @@ def generate_key(request):
                       {'form': form, 'sample_code': sample_code, 'recent_services': recent_services})
 
 
+
 @login_required
 def upload_and_sign(request):
     did = request.session['did']
@@ -117,7 +118,6 @@ def upload_and_sign(request):
         if userFileCount >= 50:
             request.session['upload_and_sign_submit'] = True
             messages.warning(request, "you have reached the total number of files")
-            request.session['upload_and_sign_submit'] = True
             form = UploadAndSignForm(initial={'did': did, 'api_key': request.session['api_key'],
                                               'private_key': request.session['private_key_mainchain']})
             return render(request, "service/upload_and_sign.html",
@@ -130,10 +130,7 @@ def upload_and_sign(request):
             if form.is_valid():
                 network = form.cleaned_data.get('network')
                 file_name = form.cleaned_data.get('file_name')
-                file_name_list = file_name.split(' ')
-                file_name = ''
-                for item in file_name_list:
-                    file_name += item + ' '
+                " ".join(file_name.split())  # standardizing whitespaces
                 api_key = form.cleaned_data.get('api_key')
                 private_key = form.cleaned_data.get('private_key')
                 file_content = form.cleaned_data.get('file_content').encode()
@@ -296,37 +293,38 @@ def create_wallet(request):
                         wallet_eth = content['sidechain']['eth']
                         if network == 'gmunet':
                             obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
-                                                                                       defaults={'did': did,
-                                                                                                 'api_key': api_key,
-                                                                                                 'mnemonic_mainchain':
-                                                                                                     wallet_mainchain[
-                                                                                                         'mnemonic'],
-                                                                                                 'public_key_mainchain':
-                                                                                                     wallet_mainchain[
-                                                                                                         'public_key'],
-                                                                                                 'private_key_mainchain':
-                                                                                                     wallet_mainchain[
-                                                                                                         'private_key'],
-                                                                                                 'address_mainchain':
-                                                                                                     wallet_mainchain[
-                                                                                                         'address'],
-                                                                                                 'private_key_did':
-                                                                                                     wallet_did[
-                                                                                                         'private_key'],
-                                                                                                 'public_key_did':
-                                                                                                     wallet_did[
-                                                                                                         'public_key'],
-                                                                                                 'address_did':
-                                                                                                     wallet_did[
-                                                                                                         'address'],
-                                                                                                 'did_did': wallet_did[
-                                                                                                     'did'],
-                                                                                                 'address_eth':
-                                                                                                     wallet_eth[
-                                                                                                         'address'],
-                                                                                                 'private_key_eth':
-                                                                                                     wallet_eth[
-                                                                                                         'private_key']})
+                                                                                           defaults={'did': did,
+                                                                                                     'api_key': api_key,
+                                                                                                     'mnemonic_mainchain':
+                                                                                                         wallet_mainchain[
+                                                                                                             'mnemonic'],
+                                                                                                     'public_key_mainchain':
+                                                                                                         wallet_mainchain[
+                                                                                                             'public_key'],
+                                                                                                     'private_key_mainchain':
+                                                                                                         wallet_mainchain[
+                                                                                                             'private_key'],
+                                                                                                     'address_mainchain':
+                                                                                                         wallet_mainchain[
+                                                                                                             'address'],
+                                                                                                     'private_key_did':
+                                                                                                         wallet_did[
+                                                                                                             'private_key'],
+                                                                                                     'public_key_did':
+                                                                                                         wallet_did[
+                                                                                                             'public_key'],
+                                                                                                     'address_did':
+                                                                                                         wallet_did[
+                                                                                                             'address'],
+                                                                                                     'did_did':
+                                                                                                         wallet_did[
+                                                                                                             'did'],
+                                                                                                     'address_eth':
+                                                                                                         wallet_eth[
+                                                                                                             'address'],
+                                                                                                     'private_key_eth':
+                                                                                                         wallet_eth[
+                                                                                                             'private_key']})
                             obj.save()
                         populate_session_vars_from_database(request, did)
                         return render(request, "service/create_wallet.html",
@@ -532,13 +530,36 @@ def deploy_eth_contract(request):
     with open(os.path.join(module_dir, 'sample_code/go/deploy_eth_contract.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
     did = request.session['did']
+    if request.is_ajax():
+        if request.POST.get('delete'):
+            try:
+                SavedETHContractInformation.objects.filter(did=did).delete()
+                data = "{'deleted':'true'}"
+                return HttpResponse(data, content_type='application/json')
+            except Exception as e:
+                logging.debug(e)
+                data = "{'deleted':'false'}"
+                return HttpResponse(data, content_type='application/json')
+
     if request.method == 'POST':
         if not request.session['deploy_eth_contract_submit']:
             # Purge old requests for housekeeping.
-            UploadFile.objects.filter(did=did).delete()
+            if len(SavedETHContractInformation.objects.filter(did=did)) >= 2:
+                request.session['deploy_eth_contract_submit'] = False
+                form = DeployETHContractForm(initial={'did': did, 'api_key': request.session['api_key'],
+                                                      'eth_account_address': request.session['address_eth'],
+                                                      'eth_private_key': request.session['private_key_eth'],
+                                                      'eth_gas': 2000000})
+                return render(request, "service/deploy_eth_contract.html",
+                              {'form': form, 'output': False, 'sample_code': sample_code,
+                               'recent_services': recent_services , 'total_reached':True})
 
+
+            UploadFile.objects.filter(did=did).delete()
             form = DeployETHContractForm(request.POST, request.FILES, initial={'did': did})
             if form.is_valid():
+                file_name = form.cleaned_data.get('file_name')
+                " ".join(file_name.split())  # standardizing whitespaces
                 network = form.cleaned_data.get('network')
                 api_key = form.cleaned_data.get('api_key')
                 eth_account_address = form.cleaned_data.get('eth_account_address')
@@ -546,16 +567,22 @@ def deploy_eth_contract(request):
                 eth_gas = form.cleaned_data.get('eth_gas')
                 form.save()
                 obj, created = UploadFile.objects.update_or_create(defaults={'did': did})
-                obj.uploaded_file.save(get_random_string(length=32), File(request.FILES['uploaded_file']))
                 try:
+                    file = File(request.FILES['uploaded_file'])
+                    if len((SavedETHContractInformation.objects.filter(did=did, file_name=file_name))) != 0:
+                        messages.success(request, "You have already uploaded a file with that name, please use a "
+                                                  "different name")
+                        return redirect(reverse('service:deploy_eth_contract'))
+                    obj.uploaded_file.save(get_random_string(length=32), file)
                     temp_file = UploadFile.objects.get(did=did)
                     file_path = temp_file.uploaded_file.path
                 except Exception as e:
-                    messages.success(request, "Please upload a file or fill out the 'File content' field")
-                    return redirect(reverse('service:upload_and_sign'))
+                    messages.success(request, "Please upload a .sol file or fill out the 'File content' field")
+                    return redirect(reverse('service:deploy_eth_contract'))
                 try:
                     sidechain_eth = SidechainEth(GRPC_SERVER_HOST, GRPC_SERVER_PORT, PRODUCTION)
-                    response = sidechain_eth.deploy_eth_contract(api_key, did, network, eth_account_address, eth_private_key,
+                    response = sidechain_eth.deploy_eth_contract(api_key, did, network, eth_account_address,
+                                                                 eth_private_key,
                                                                  eth_gas,
                                                                  file_path)
                     if response['status']:
@@ -565,6 +592,11 @@ def deploy_eth_contract(request):
                         contract_address = data['result']['contract_address']
                         contract_name = data['result']['contract_name']
                         contract_code_hash = data['result']['contract_code_hash']
+                        SavedETHContractInformation.objects.update_or_create(file_name=file_name,
+                                                                             contract_address=contract_address,
+                                                                             contract_name=contract_name,
+                                                                             contract_code_hash=contract_code_hash,
+                                                                             did=did)
                         return render(request, "service/deploy_eth_contract.html",
                                       {"contract_address": contract_address, "contract_name": contract_name,
                                        "contract_code_hash": contract_code_hash, 'output': True,
@@ -602,9 +634,16 @@ def watch_eth_contract(request):
         sample_code['python'] = myfile.read()
     with open(os.path.join(module_dir, 'sample_code/go/watch_eth_contract.go'), 'r') as myfile:
         sample_code['go'] = myfile.read()
+    if request.is_ajax():
+        file_name = request.POST.get('file_name')
+        if file_name is not None:
+            contract_info = SavedETHContractInformation.objects.filter(did=did, file_name=file_name)
+            data = serializers.serialize('json', contract_info)
+            data = data[1:-1]
+            return HttpResponse(data, content_type='application/json')
     if request.method == 'POST':
         if not request.session['watch_eth_contract_submit']:
-            form = WatchETHContractForm(request.POST)
+            form = WatchETHContractForm(request.POST, did=did)
             if form.is_valid():
                 network = form.cleaned_data.get('network')
                 api_key = form.cleaned_data.get('api_key')
@@ -640,7 +679,7 @@ def watch_eth_contract(request):
             return redirect(reverse('service:watch_eth_contract'))
     else:
         request.session['watch_eth_contract_submit'] = False
-        form = WatchETHContractForm(initial={'api_key': request.session['api_key']})
+        form = WatchETHContractForm(initial={'api_key': request.session['api_key']}, did=did)
         return render(request, 'service/watch_eth_contract.html',
                       {'output': False, 'form': form, 'sample_code': sample_code, 'recent_services': recent_services})
 
