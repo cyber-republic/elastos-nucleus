@@ -221,3 +221,20 @@
 .wrapper {
   width: 100% !important;
 }
+
+span button.btn.collapsed:before
+{
+    content:'+' ;
+    display:block;
+    font-size: 20px;
+    font-weight: bold;
+    width:20px;
+}
+span button.btn:before
+{
+    content:'-' ;
+    display:block;
+    font-size: 20px;
+    font-weight: bold;
+    width:20px;
+}

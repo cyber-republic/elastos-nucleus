@@ -259,20 +259,29 @@
                 <div class="divider"></div>
                 <div class="row" style="margin-left: 30px; margin-right: 30px">
                     <div class="wrapper">
-                    <div class="activity-accordion" id="accordion">
-                        {% for activity in your_activity %}
-                            <div class="card-transparent text-white border-dark mb-3">
-                                {% for key, value in activity.items %}
-                                    {% if 'display_string' in key %}
-                                        <div class="card-header" id="heading{{ forloop.parentloop.counter }}">
-                                            <h5 class="mb-0">
-                                                <button class="text-white btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{ forloop.parentloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.parentloop.counter }}">
-                                                    {{ value }}
-                                                </button>
-                                            </h5>
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
+                        <div class="activity-accordion" id="accordion">
+                            {% for activity in your_activity %}
+                                <div class="card-transparent text-white border-dark mb-3">
+                                    {% for key, value in activity.items %}
+                                        {% if 'display_string' in key %}
+                                            <div class="card-header" id="heading{{ forloop.parentloop.counter }}" style="background-color: rgba(0, 0, 0, 0); border-bottom: 0px;">
+                                                <div class="row">
+                                                    <div class="col-md-6 text-center align-middle">
+                                                        <span class="float-md-left align-middle">
+                                                            <h5 class="mb-0 align-middle" style="font-family: Overpass;">
+                                                                {{ value }}
+                                                            </h5>
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-md-6 text-center">
+                                                        <span class="float-md-right">
+                                                            <button class="text-white btn btn-outline-light collapsed" data-toggle="collapse" data-target="#collapse{{ forloop.parentloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.parentloop.counter }}"></button>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
                                         <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" data-parent="#accordion">
                                             <div class="card-body">
                                             {% for ind, child in activity.items %}
@@ -283,11 +292,11 @@
                                             {% endfor %}
                                             </div>
                                         </div>
-                            </div>
-                            <div class="divider"></div>
-                        {% endfor %}
+                                    </div>
+                                <div class="divider"></div>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
                 </div>
             </div>
         </div>
