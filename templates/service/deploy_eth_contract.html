@@ -6,10 +6,10 @@
 {% endblock title %}
 
 {% block scripts_services %}
-    {% if total_reached %}
-        <script src = {% static 'javascript/deployethcontract.js' %}></script>
-        <script src = {% static 'javascript/uploadFile.js' %} ></script>
-    {% endif %}
+    <script>
+        var total_reached = "{{ total_reached }}"
+    </script>
+    <script src = {% static 'javascript/uploadFile.js' %}></script>
 {% endblock scripts_services %}
 
 {% block related_services %}

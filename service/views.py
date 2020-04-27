@@ -171,7 +171,8 @@ def upload_and_sign(request):
                         return render(request, "service/upload_and_sign.html",
                                       {"message_hash": message_hash, "public_key": public_key, "signature": signature,
                                        "file_hash": file_hash, 'output': True, 'sample_code': sample_code,
-                                       'recent_services': recent_services})
+                                       'recent_services': recent_services ,
+                                       'total_reached':False})
                     else:
                         messages.success(request, response['status_message'])
                         return redirect(reverse('service:upload_and_sign'))
@@ -191,7 +192,8 @@ def upload_and_sign(request):
         form = UploadAndSignForm(initial={'did': did, 'api_key': request.session['api_key'],
                                           'private_key': request.session['private_key_mainchain']})
         return render(request, "service/upload_and_sign.html",
-                      {'form': form, 'output': False, 'sample_code': sample_code, 'recent_services': recent_services})
+                      {'form': form, 'output': False, 'sample_code': sample_code, 'recent_services': recent_services ,
+                       'total_reached': False})
 
 
 @login_required
@@ -543,7 +545,7 @@ def deploy_eth_contract(request):
     if request.method == 'POST':
         if not request.session['deploy_eth_contract_submit']:
             # Purge old requests for housekeeping.
-            if len(SavedETHContractInformation.objects.filter(did=did)) >= 2:
+            if len(SavedETHContractInformation.objects.filter(did=did)) >= 50:
                 request.session['deploy_eth_contract_submit'] = False
                 form = DeployETHContractForm(initial={'did': did, 'api_key': request.session['api_key'],
                                                       'eth_account_address': request.session['address_eth'],
@@ -600,7 +602,8 @@ def deploy_eth_contract(request):
                                       {"contract_address": contract_address, "contract_name": contract_name,
                                        "contract_code_hash": contract_code_hash, 'output': True,
                                        'sample_code': sample_code,
-                                       'recent_services': recent_services})
+                                       'recent_services': recent_services,
+                                       'total_reached':False})
                     else:
                         messages.success(request, response['status_message'])
                         return redirect(reverse('service:deploy_eth_contract'))
@@ -619,7 +622,8 @@ def deploy_eth_contract(request):
                                               'eth_private_key': request.session['private_key_eth'],
                                               'eth_gas': 2000000})
         return render(request, "service/deploy_eth_contract.html",
-                      {'form': form, 'output': False, 'sample_code': sample_code, 'recent_services': recent_services})
+                      {'form': form, 'output': False, 'sample_code': sample_code, 'recent_services': recent_services ,
+                       'total_reached':False})
 
 
 @login_required
