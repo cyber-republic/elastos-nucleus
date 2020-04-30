@@ -183,7 +183,8 @@ def upload_and_sign(request):
                 finally:
                     temp_file.delete()
                     if remove_uploaded_file:
-                        os.remove(os.path.join(MEDIA_ROOT + '/user_files/', user_uploaded_file.name))
+                        user_uploaded_file_name = "_".join(user_uploaded_file.name.split())
+                        os.remove(os.path.join(MEDIA_ROOT + '/user_files/', user_uploaded_file_name))
                     hive.close()
         else:
             return redirect(reverse('service:upload_and_sign'))
@@ -544,7 +545,6 @@ def deploy_eth_contract(request):
 
     if request.method == 'POST':
         if not request.session['deploy_eth_contract_submit']:
-            # Purge old requests for housekeeping.
             if len(SavedETHContractInformation.objects.filter(did=did)) >= 50:
                 request.session['deploy_eth_contract_submit'] = False
                 form = DeployETHContractForm(initial={'did': did, 'api_key': request.session['api_key'],
@@ -555,7 +555,7 @@ def deploy_eth_contract(request):
                               {'form': form, 'output': False, 'sample_code': sample_code,
                                'recent_services': recent_services , 'total_reached':True})
 
-
+            # Purge old requests for housekeeping.
             UploadFile.objects.filter(did=did).delete()
             form = DeployETHContractForm(request.POST, request.FILES, initial={'did': did})
             if form.is_valid():
@@ -577,6 +577,7 @@ def deploy_eth_contract(request):
                     obj.uploaded_file.save(get_random_string(length=32), file)
                     temp_file = UploadFile.objects.get(did=did)
                     file_path = temp_file.uploaded_file.path
+                    remove_file = True
                 except Exception as e:
                     messages.success(request, "Please upload a .sol file or fill out the 'File content' field")
                     return redirect(reverse('service:deploy_eth_contract'))
@@ -588,7 +589,6 @@ def deploy_eth_contract(request):
                                                                  file_path)
                     if response['status']:
                         request.session['deploy_eth_contract_submit'] = True
-                        temp_file.delete()
                         data = json.loads(response['output'])
                         contract_address = data['result']['contract_address']
                         contract_name = data['result']['contract_name']
@@ -612,6 +612,10 @@ def deploy_eth_contract(request):
                     messages.success(request, "Could not deploy smart contract to Eth sidechain. Please try again")
                     return redirect(reverse('service:deploy_eth_contract'))
                 finally:
+                    temp_file.delete()
+                    if remove_file:
+                        user_uploaded_file_name = "_".join(file.name.split())
+                        os.remove(os.path.join(MEDIA_ROOT + '/user_files/', user_uploaded_file_name))
                     sidechain_eth.close()
         else:
             return redirect(reverse('service:deploy_eth_contract'))
