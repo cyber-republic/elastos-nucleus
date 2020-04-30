@@ -265,18 +265,19 @@
                                     {% for key, value in activity.items %}
                                         {% if 'display_string' in key %}
                                             <div class="card-header" id="heading{{ forloop.parentloop.counter }}" style="background-color: rgba(0, 0, 0, 0); border-bottom: 0px;">
-                                                <div class="row">
-                                                    <div class="col-md-6 text-center align-middle">
+                                                <div class="d-flex align-items-stretch">
+                                                    <div class="mr-auto p-2">
                                                         <span class="float-md-left align-middle">
                                                             <h5 class="mb-0 align-middle" style="font-family: Overpass;">
                                                                 {{ value }}
                                                             </h5>
                                                         </span>
                                                     </div>
-                                                    <div class="col-md-6 text-center">
-                                                        <span class="float-md-right">
-                                                            <button class="text-white btn btn-outline-light collapsed" data-toggle="collapse" data-target="#collapse{{ forloop.parentloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.parentloop.counter }}"></button>
-                                                        </span>
+                                                    <div class="p-2">
+                                                        {{ activity.last_visited }}
+                                                    </div>
+                                                    <div class="p-2">
+                                                        <button class="text-white btn btn-block h-100 btn-outline-light collapsed" data-toggle="collapse" data-target="#collapse{{ forloop.parentloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.parentloop.counter }}"></button>
                                                     </div>
                                                 </div>
                                             </div>

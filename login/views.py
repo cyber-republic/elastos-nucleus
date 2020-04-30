@@ -3,7 +3,9 @@ import logging
 
 import json
 import csv
+import math
 
+from django.utils import timezone
 from django.apps import apps
 from django.conf import settings
 
@@ -115,31 +117,38 @@ def feed(request):
     your_activity_list = []
     all_apps = settings.ALL_APPS
     for items in recent_pages:
+
         model_found = False
         view_name = items.view.split(':')[1]  # get the view name
         your_activity_model = get_activity_model(view_name)
         if your_activity_model is None:
             your_activity_list.append({
-                'display_string': 'You just visited "{0}" page'.format(items.name)
+                'display_string': 'You just visited "{0}" page'.format(items.name), 'last_visited': "{} mins ago".format(math.floor(((timezone.now() - items.last_visited).seconds) / 60))
             })
         else:
             for app in all_apps:
+
                 app_models = apps.get_app_config(app).get_models()
                 for model in app_models:
                     try:
                         if model.__name__ == your_activity_model:
                             obj_model = model.objects.filter(did=did).last()
+                            # print(obj_model.your_activity()[view_name])
+                            new_list = (obj_model.your_activity()[view_name])
+                            new_list['last_visited'] = "{} mins ago".format(
+                                math.floor(((timezone.now() - items.last_visited).seconds) / 60))
                             your_activity_list.append(
-                                obj_model.your_activity()[view_name])
+                                new_list)  # .append({'last_visited': "{}".format(items.last_visited)})
+
                             model_found = True
                             break
                     except Exception as e:
                         your_activity_list.append({
-                            'display_string': 'You just visited "{0}" page'.format(items.name)
+                            'display_string': 'You just visited "{0}" page'.format(items.name), 'last_visited': "{} mins ago".format(math.floor(((timezone.now() - items.last_visited).seconds) / 60))
                         })
                 if model_found:
                     break
-
+    print(your_activity_list)
     return render(request, 'login/feed.html', {'recent_pages': recent_pages, 'recent_services': recent_services,
                                                'most_visited_pages': most_visited_pages, 'suggest_form': suggest_form,
                                                'your_activity': your_activity_list})
