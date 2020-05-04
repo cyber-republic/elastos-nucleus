@@ -110,14 +110,12 @@ def feed(request):
     suggest_form = SuggestServiceForm()
     did = request.session['did']
     recent_services = get_recent_services(did)
-    recent_pages = TrackUserPageVisits.objects.filter(
-        did=did).order_by('-last_visited')[:9]
-    most_visited_pages = TrackUserPageVisits.objects.filter(
-        did=did).order_by('-number_visits')[:5]
+    recent_pages = TrackUserPageVisits.objects.filter(did=did , activity_completed=False).order_by('-last_visited')[:9]
+    most_visited_pages = TrackUserPageVisits.objects.filter(did=did).order_by('-number_visits')[:5]
+    activity_pages = TrackUserPageVisits.objects.filter(did = did , activity_completed=True).order_by('-last_visited')[:9]
     your_activity_list = []
     all_apps = settings.ALL_APPS
-    for items in recent_pages:
-
+    for items in activity_pages:
         model_found = False
         view_name = items.view.split(':')[1]  # get the view name
         your_activity_model = get_activity_model(view_name)
@@ -133,22 +131,31 @@ def feed(request):
                     try:
                         if model.__name__ == your_activity_model:
                             obj_model = model.objects.filter(did=did).last()
-                            # print(obj_model.your_activity()[view_name])
-                            new_list = (obj_model.your_activity()[view_name])
-                            new_list['last_visited'] = "{} mins ago".format(
-                                math.floor(((timezone.now() - items.last_visited).seconds) / 60))
-                            your_activity_list.append(
-                                new_list)  # .append({'last_visited': "{}".format(items.last_visited)})
-
-                            model_found = True
-                            break
+                            if items.additional_field != '':
+                                try:
+                                    obj_dict = obj_model.your_activity()[view_name][items.additional_field]
+                                    obj_dict['last_visited'] = "{} mins ago".format(math.floor(((timezone.now() - items.last_visited).seconds) / 60))
+                                    your_activity_list.append(obj_dict)
+                                    model_found = True
+                                    break
+                                except KeyError as e:
+                                    your_activity_list.append({
+                                        'display_string': 'You just visited "{0}" page'.format(items.name), 'last_visited': "{} mins ago".format(math.floor(((timezone.now() - items.last_visited).seconds) / 60))
+                                    })
+                                    logging.debug(e)
+                                    break
+                            else:
+                                obj_dict = obj_model.your_activity()[view_name]
+                                obj_dict['last_visited'] = "{} mins ago".format(math.floor(((timezone.now() - items.last_visited).seconds) / 60))
+                                your_activity_list.append(obj_dict)
+                                model_found = True
+                                break
                     except Exception as e:
                         your_activity_list.append({
                             'display_string': 'You just visited "{0}" page'.format(items.name), 'last_visited': "{} mins ago".format(math.floor(((timezone.now() - items.last_visited).seconds) / 60))
                         })
                 if model_found:
                     break
-    print(your_activity_list)
     return render(request, 'login/feed.html', {'recent_pages': recent_pages, 'recent_services': recent_services,
                                                'most_visited_pages': most_visited_pages, 'suggest_form': suggest_form,
                                                'your_activity': your_activity_list})

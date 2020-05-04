@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.core.files.base import ContentFile, File
 from django.shortcuts import render, redirect
 from django.utils.crypto import get_random_string
+from elastos_adenine import NodeRpc
 
 from console_main.settings import MEDIA_ROOT, GRPC_SERVER_HOST, GRPC_SERVER_PORT, PRODUCTION, SHARED_SECRET_ADENINE
 from console_main.views import login_required, populate_session_vars_from_database, track_page_visit, \
@@ -57,6 +58,7 @@ def generate_key(request):
                         obj.save()
                         populate_session_vars_from_database(request, did)
                         output['get_api_key'] = True
+                        token = 'get'
                     else:
                         error_message = response['status_message']
                 elif 'submit_generate_api_key' in request.POST:
@@ -70,6 +72,7 @@ def generate_key(request):
                         obj.save()
                         populate_session_vars_from_database(request, did)
                         output['generate_api_key'] = True
+                        token = 'generate'
                     else:
                         error_message = response['status_message']
                 else:
@@ -80,6 +83,7 @@ def generate_key(request):
                     return redirect(reverse('service:generate_key'))
                 else:
                     request.session['api_key'] = api_key
+                    track_page_visit(did , 'Generate API Key' , "service:generate_key" , True , True , token)
                     return render(request, "service/generate_key.html",
                                   {'output': output, 'api_key': api_key, 'sample_code': sample_code,
                                    'recent_services': recent_services})
@@ -117,12 +121,14 @@ def upload_and_sign(request):
         if userFileCount >= 50:
             request.session['upload_and_sign_submit'] = True
             messages.warning(request, "you have reached the total number of files")
-            request.session['upload_and_sign_submit'] = True
             form = UploadAndSignForm(initial={'did': did, 'api_key': request.session['api_key'],
                                               'private_key': request.session['private_key_mainchain']})
+
+
             return render(request, "service/upload_and_sign.html",
                           {'form': form, 'output': False, 'sample_code': sample_code,
                            'recent_services': recent_services, 'total_reached': True})
+
         if not request.session['upload_and_sign_submit']:
             # Purge old requests for housekeeping.
             UploadFile.objects.filter(did=did).delete()
@@ -172,6 +178,8 @@ def upload_and_sign(request):
                             SavedFileInformation.objects.update_or_create(did=did, file_name=file_name,
                                                                           message_hash=message_hash,
                                                                           signature=signature, file_hash=file_hash)
+
+                        track_page_visit(did , 'Upload And Sign' , "service:upload_and_sign" , True , True)
                         return render(request, "service/upload_and_sign.html",
                                       {"message_hash": message_hash, "public_key": public_key, "signature": signature,
                                        "file_hash": file_hash, 'output': True, 'sample_code': sample_code,
@@ -244,6 +252,7 @@ def verify_and_show(request):
                             response = HttpResponse(file_content, content_type='application/octet-stream')
                             response['Content-Disposition'] = 'attachment; filename=file_from_hive'
                             return response
+                        track_page_visit(did, 'Verify And Show', 'service:verify_and_show', True, True)
                         return render(request, 'service/verify_and_show.html',
                                       {'output': True, 'content': content, 'sample_code': sample_code,
                                        'recent_services': recent_services})
@@ -294,7 +303,8 @@ def create_wallet(request):
                         wallet_did = content['sidechain']['did']
                         wallet_token = content['sidechain']['token']
                         wallet_eth = content['sidechain']['eth']
-                        obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
+                        if network == 'gmunet':
+                            obj, created = UserServiceSessionVars.objects.update_or_create(did=did,
                                                                                        defaults={'did': did,
                                                                                                  'api_key': api_key,
                                                                                                  'mnemonic_mainchain':
@@ -326,8 +336,9 @@ def create_wallet(request):
                                                                                                  'private_key_eth':
                                                                                                      wallet_eth[
                                                                                                          'private_key']})
-                        obj.save()
+                            obj.save()
                         populate_session_vars_from_database(request, did)
+                        track_page_visit(did , 'Create Wallet', "service:create_wallet" , True , True)
                         return render(request, "service/create_wallet.html",
                                       {'output': True, 'wallet_mainchain': wallet_mainchain,
                                        'wallet_did': wallet_did, 'wallet_token': wallet_token, 'wallet_eth': wallet_eth,
@@ -408,26 +419,26 @@ def view_wallet(request):
             api_key = form.cleaned_data.get('api_key')
             addr = form.cleaned_data.get('address')
             try:
-                wallet = Wallet(GRPC_SERVER_HOST, GRPC_SERVER_PORT, PRODUCTION)
-                response = wallet.view_wallet(api_key, did, network, chain, addr)
-                if response['status']:
+                node_rpc = NodeRpc(GRPC_SERVER_HOST, GRPC_SERVER_PORT, PRODUCTION)
+                current_balance = node_rpc.get_current_balance(api_key, did, network, chain, addr)
+                if current_balance:
                     output[chain] = True
-                    content = json.loads(response['output'])['result']
-                    address[chain] = content['address']
-                    balance[chain] = content['balance']
+                    address[chain] = addr
+                    balance[chain] = current_balance
+                    track_page_visit(did, 'View Wallet', 'service:view_wallet', True, True, chain)
                     return render(request, "service/view_wallet.html", {'output': output, 'form': form_to_display,
                                                                         'address': address, 'balance': balance,
                                                                         'sample_code': sample_code,
                                                                         'recent_services': recent_services})
                 else:
-                    messages.success(request, response['status_message'])
+                    messages.success(request, "Balance could not be retrieved")
                     return redirect(reverse('service:view_wallet'))
             except Exception as e:
                 logging.debug(f"did: {did} Method: view_wallet Error: {e}")
                 messages.success(request, "Could not view wallet at this time. Please try again")
                 return redirect(reverse('service:view_wallet'))
             finally:
-                wallet.close()
+                node_rpc.close()
     else:
         return render(request, 'service/view_wallet.html',
                       {'output': output, 'form': form_to_display, 'sample_code': sample_code,
@@ -499,6 +510,7 @@ def request_ela(request):
                     content = json.loads(response['output'])['result']
                     address[chain] = content['address']
                     deposit_amount[chain] = content['deposit_amount']
+                    track_page_visit(did, 'Request ELA', 'service:request_ela', True , True , chain)
                     return render(request, "service/request_ela.html", {'output': output, 'form': form_to_display,
                                                                         'address': address,
                                                                         'deposit_amount': deposit_amount,
@@ -564,6 +576,7 @@ def deploy_eth_contract(request):
                         contract_address = data['result']['contract_address']
                         contract_name = data['result']['contract_name']
                         contract_code_hash = data['result']['contract_code_hash']
+                        track_page_visit(did, 'Deploy ETH Contract', 'service:deploy_eth_contract', True , True)
                         return render(request, "service/deploy_eth_contract.html",
                                       {"contract_address": contract_address, "contract_name": contract_name,
                                        "contract_code_hash": contract_code_hash, 'output': True,
@@ -620,6 +633,7 @@ def watch_eth_contract(request):
                         contract_address = data['result']['contract_address']
                         contract_functions = data['result']['contract_functions']
                         contract_source = data['result']['contract_source']
+                        track_page_visit(did, 'Watch ETH Contract', 'service:watch_eth_contract', True , True)
                         return render(request, "service/watch_eth_contract.html",
                                       {'output': True, 'contract_address': contract_address,
                                        'contract_name': contract_name,
