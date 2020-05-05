@@ -28,6 +28,8 @@ from .forms import DeployETHContractForm, WatchETHContractForm
 from .models import UploadFile, UserServiceSessionVars, SavedFileInformation, SavedETHContractInformation
 
 
+
+
 @login_required
 def generate_key(request):
     did = request.session['did']
@@ -122,6 +124,7 @@ def upload_and_sign(request):
             return render(request, "service/upload_and_sign.html",
                           {'form': form, 'output': False, 'sample_code': sample_code,
                            'recent_services': recent_services, 'total_reached': True})
+
         if not request.session['upload_and_sign_submit']:
             # Purge old requests for housekeeping.
             UploadFile.objects.filter(did=did).delete()
@@ -141,13 +144,15 @@ def upload_and_sign(request):
                     return redirect(reverse('service:upload_and_sign'))
                 form.save()
                 obj, created = UploadFile.objects.update_or_create(defaults={'did': did})
+                true_file_name = obj.filename()
                 if file_content:
                     remove_uploaded_file = False
                     user_uploaded_file = ContentFile(file_content)
                 else:
                     remove_uploaded_file = True
                     user_uploaded_file = File(request.FILES['uploaded_file'])
-                obj.uploaded_file.save(get_random_string(length=32), user_uploaded_file)
+
+                obj.uploaded_file.save(get_random_string(32),user_uploaded_file)
                 try:
                     temp_file = UploadFile.objects.get(did=did)
                     file_path = temp_file.uploaded_file.path
@@ -182,9 +187,8 @@ def upload_and_sign(request):
                     return redirect(reverse('service:upload_and_sign'))
                 finally:
                     temp_file.delete()
-                    if remove_uploaded_file:
-                        user_uploaded_file_name = "_".join(user_uploaded_file.name.split())
-                        os.remove(os.path.join(MEDIA_ROOT + '/user_files/', user_uploaded_file_name))
+                    if(remove_uploaded_file):
+                        os.remove(os.path.join(MEDIA_ROOT ,'user_files' ,true_file_name))
                     hive.close()
         else:
             return redirect(reverse('service:upload_and_sign'))
@@ -568,6 +572,7 @@ def deploy_eth_contract(request):
                 eth_gas = form.cleaned_data.get('eth_gas')
                 form.save()
                 obj, created = UploadFile.objects.update_or_create(defaults={'did': did})
+                true_file_name = obj.filename()
                 try:
                     file = File(request.FILES['uploaded_file'])
                     if len((SavedETHContractInformation.objects.filter(did=did, file_name=file_name))) != 0:
@@ -614,8 +619,7 @@ def deploy_eth_contract(request):
                 finally:
                     temp_file.delete()
                     if remove_file:
-                        user_uploaded_file_name = "_".join(file.name.split())
-                        os.remove(os.path.join(MEDIA_ROOT + '/user_files/', user_uploaded_file_name))
+                        os.remove(os.path.join(MEDIA_ROOT , 'user_files', true_file_name))
                     sidechain_eth.close()
         else:
             return redirect(reverse('service:deploy_eth_contract'))

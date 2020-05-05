@@ -2,7 +2,6 @@
 import os
 
 from django.db import models
-
 from console_main import settings
 
 
