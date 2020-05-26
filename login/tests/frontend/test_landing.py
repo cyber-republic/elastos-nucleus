@@ -1,6 +1,7 @@
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from django.contrib.sites.shortcuts import get_current_site
 from decouple import config
 
 
