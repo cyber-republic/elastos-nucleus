@@ -14,8 +14,6 @@ class LandingPageCase(LiveServerTestCase):
         CookieConsentSettings.objects.create(cookie_policy_link="google.com")
         options = webdriver.ChromeOptions()
         options.add_argument('--incognito')
-        options.add_argument("--disable-extensions")
-        options.add_argument("--disable-gpu")
         options.add_argument("--headless")
         self.selenium = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
         super(LandingPageCase, self).setUp()
@@ -24,7 +22,7 @@ class LandingPageCase(LiveServerTestCase):
         self.selenium.quit()
         super(LandingPageCase, self).tearDown()
 
-    def test_landing_(self):
+    def test_landing(self):
         selenium = self.selenium
         selenium.get(self.live_server_url)
         landing_title = selenium.title

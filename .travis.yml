@@ -5,6 +5,10 @@ python:
 
 services:
   - docker
+addons:
+  chrome: stable
 script:
   - bash ./test.sh
+
+
 
