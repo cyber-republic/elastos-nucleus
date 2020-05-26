@@ -15,6 +15,7 @@ class LandingPageCase(LiveServerTestCase):
         options = webdriver.ChromeOptions()
         options.add_argument('--incognito')
         options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
         self.selenium = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
         super(LandingPageCase, self).setUp()
 
