@@ -23,6 +23,12 @@ class LandingPageCase(LiveServerTestCase):
         self.selenium.quit()
         super(LandingPageCase, self).tearDown()
 
+    def test_landing(self):
+        selenium = self.selenium
+        selenium.get(self.live_server_url)
+        landing_title = selenium.title
+        self.assertEqual(landing_title, "Landing - Elastos Nucleus")
+
     def test_login_button_exist(self):
         selenium = self.selenium
         selenium.get(self.live_server_url)
