@@ -8,7 +8,7 @@ colorama==0.4.3
 configparser==5.0.0
 coverage==5.1
 crayons==0.3.0
-cryptography==2.9.2
+cryptography==3.2
 Django==2.2.13
 django-admin-tools==0.8.1
 django-appconf==1.0.3
