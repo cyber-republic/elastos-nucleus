@@ -20,7 +20,7 @@ django-mathfilters==1.0.0
 -e git+https://github.com/dprog-philippe-docourt/django-qr-code.git@d8811b7e05b1beff466c7800007b603c3c1eae7f#egg=django_qr_code
 django-sass-processor==0.7.4
 django-simple-cookie-consent==0.1.1
-djangorestframework==3.10.3
+djangorestframework==3.11.2
 elastos-adenine==2.0.3
 ExtensionClass==4.4
 fastecdsa==1.7.5
