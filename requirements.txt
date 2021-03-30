@@ -9,7 +9,8 @@ configparser==5.0.0
 coverage==5.1
 crayons==0.3.0
 cryptography==3.2
-Django==2.2.13
+cryptography==2.9.2
+Django==2.2.18
 django-admin-tools==0.8.1
 django-appconf==1.0.3
 django-classy-tags==0.9.0
@@ -20,7 +21,7 @@ django-mathfilters==1.0.0
 -e git+https://github.com/dprog-philippe-docourt/django-qr-code.git@d8811b7e05b1beff466c7800007b603c3c1eae7f#egg=django_qr_code
 django-sass-processor==0.7.4
 django-simple-cookie-consent==0.1.1
-djangorestframework==3.10.3
+djangorestframework==3.11.2
 elastos-adenine==2.0.3
 ExtensionClass==4.4
 fastecdsa==1.7.5
@@ -33,7 +34,7 @@ lazy-object-proxy==1.4.3
 libsass==0.19.4
 mccabe==0.6.1
 namegenerator==1.0.6
-Pillow==6.2.2
+Pillow==8.1.1
 protobuf==3.11.1
 psycopg2-binary==2.8.5
 pycodestyle==2.5.0
