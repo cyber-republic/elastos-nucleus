@@ -10,7 +10,7 @@ coverage==5.1
 crayons==0.3.0
 cryptography==3.2
 cryptography==2.9.2
-Django==2.2.18
+Django==2.2.21
 django-admin-tools==0.8.1
 django-appconf==1.0.3
 django-classy-tags==0.9.0
